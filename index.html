@@ -2,21 +2,31 @@
 <style>
   :root{
     color-scheme: light;
-    --page:            #f5f6f9;
+    --page:            #f4f6f9;
     --surface:         #ffffff;
     --surface-2:       #fbfbfd;
-    --surface-sunken:  #eef0f5;
-    --border:          rgba(20,20,40,0.09);
-    --border-strong:   rgba(20,20,40,0.16);
-    --text-primary:    #14152b;
-    --text-secondary:  #52546b;
-    --text-muted:      #8688a0;
-    --brand-blue:      #323ba7;
-    --brand-blue-ink:  #262d80;
+    --surface-sunken:  #edf1f5;
+    --border:          rgba(0,32,60,0.10);
+    --border-strong:   rgba(0,32,60,0.18);
+    --text-primary:    #10233a;
+    --text-secondary:  #4c5b6e;
+    --text-muted:      #82909e;
+    /* Fase 37 — paleta oficial de marca (BRANDBOOK-SAIS USADOS): azul y
+       "Process Blue" corresponden a PANTONE 2945 C / Process Blue C 2; oro,
+       amarillo y magenta son los 3 acentos secundarios del brandbook
+       (PANTONE 7548 C / 108 C / 233 U). Los colores de estado (good/warning/
+       critical) se mantienen semánticos (verde/ámbar/rojo), no de marca, por
+       legibilidad — ver dataviz. */
+    --brand-blue:      #004c94; /* PANTONE 2945 C */
+    --brand-blue-ink:  #00335f;
+    --brand-teal:      #0083b1; /* PANTONE Process Blue C 2 */
+    --brand-gold:      #e8a400; /* PANTONE 7548 C (oscurecido levemente para contraste como acento de dato) */
+    --brand-yellow:    #ffc600; /* PANTONE 108 C — triángulo del isotipo */
+    --brand-magenta:   #c73883; /* PANTONE 233 U */
     --brand-green:     #5aa616;
-    --accent-wash:     #eef0fb;
-    --shadow-sm:       0 1px 2px rgba(20,20,45,0.06);
-    --shadow-md:       0 6px 20px -6px rgba(20,20,45,0.16);
+    --accent-wash:     #e7f0f8;
+    --shadow-sm:       0 1px 2px rgba(0,25,50,0.07);
+    --shadow-md:       0 6px 20px -6px rgba(0,25,50,0.18);
     --good:            #0ca30c;
     --warning:         #c98500;
     --serious:         #ec835a;
@@ -24,12 +34,12 @@
     --good-wash:       #e4f6e2;
     --warning-wash:    #fbeed2;
     --critical-wash:   #fbe4e1;
-    --z1: #2a78d6; /* RM - V */
-    --z2: #eb6834; /* Longitudinal */
-    --z3: #1baf7a; /* Concepcion */
-    --z4: #eda100; /* Temuco - Valdivia */
-    --z5: #e87ba4; /* Sur */
-    --gridline: #e6e7ee;
+    --z1: #004c94; /* RM - V — azul de marca */
+    --z2: #0083b1; /* Longitudinal — Process Blue de marca */
+    --z3: #c73883; /* Concepcion — magenta de marca */
+    --z4: #e8a400; /* Temuco - Valdivia — oro de marca */
+    --z5: #64748b; /* Sur — gris azulado neutro (5ª categoría, fuera de la paleta de marca para mantener contraste entre zonas) */
+    --gridline: #e2e7ee;
     --font-display: 'Poppins', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
   }
@@ -42,13 +52,17 @@
       --surface-sunken:  #0d0e16;
       --border:          rgba(255,255,255,0.09);
       --border-strong:   rgba(255,255,255,0.18);
-      --text-primary:    #f2f2f7;
-      --text-secondary:  #b7b8cc;
-      --text-muted:      #82839c;
-      --brand-blue:      #5c67d6;
-      --brand-blue-ink:  #a9b0f2;
+      --text-primary:    #f0f4f8;
+      --text-secondary:  #b7c2cf;
+      --text-muted:      #8894a4;
+      --brand-blue:      #4d9fe0;
+      --brand-blue-ink:  #9cc9ee;
+      --brand-teal:      #35bcdc;
+      --brand-gold:      #ffbe3d;
+      --brand-yellow:    #ffdb4d;
+      --brand-magenta:   #e066a3;
       --brand-green:     #86d13a;
-      --accent-wash:     #1e2140;
+      --accent-wash:     #152234;
       --shadow-sm:       0 1px 2px rgba(0,0,0,0.3);
       --shadow-md:       0 10px 28px -8px rgba(0,0,0,0.55);
       --good:            #26c92a;
@@ -58,12 +72,12 @@
       --good-wash:       #163420;
       --warning-wash:    #3a2f12;
       --critical-wash:   #3a1c1c;
-      --z1: #3987e5;
-      --z2: #f08654;
-      --z3: #199e70;
-      --z4: #c98500;
-      --z5: #d55181;
-      --gridline: #2a2b3d;
+      --z1: #4d9fe0;
+      --z2: #35bcdc;
+      --z3: #e066a3;
+      --z4: #ffbe3d;
+      --z5: #8b98ac;
+      --gridline: #263042;
     }
   }
   :root[data-theme="dark"]{
@@ -74,13 +88,17 @@
     --surface-sunken:  #0d0e16;
     --border:          rgba(255,255,255,0.09);
     --border-strong:   rgba(255,255,255,0.18);
-    --text-primary:    #f2f2f7;
-    --text-secondary:  #b7b8cc;
-    --text-muted:      #82839c;
-    --brand-blue:      #5c67d6;
-    --brand-blue-ink:  #a9b0f2;
+    --text-primary:    #f0f4f8;
+    --text-secondary:  #b7c2cf;
+    --text-muted:      #8894a4;
+    --brand-blue:      #4d9fe0;
+    --brand-blue-ink:  #9cc9ee;
+    --brand-teal:      #35bcdc;
+    --brand-gold:      #ffbe3d;
+    --brand-yellow:    #ffdb4d;
+    --brand-magenta:   #e066a3;
     --brand-green:     #86d13a;
-    --accent-wash:     #1e2140;
+    --accent-wash:     #152234;
     --shadow-sm:       0 1px 2px rgba(0,0,0,0.3);
     --shadow-md:       0 10px 28px -8px rgba(0,0,0,0.55);
     --good:            #26c92a;
@@ -90,12 +108,12 @@
     --good-wash:       #163420;
     --warning-wash:    #3a2f12;
     --critical-wash:   #3a1c1c;
-    --z1: #3987e5;
-    --z2: #f08654;
-    --z3: #199e70;
-    --z4: #c98500;
-    --z5: #d55181;
-    --gridline: #2a2b3d;
+    --z1: #4d9fe0;
+    --z2: #35bcdc;
+    --z3: #e066a3;
+    --z4: #ffbe3d;
+    --z5: #8b98ac;
+    --gridline: #263042;
   }
 
   *{box-sizing:border-box;}
@@ -130,7 +148,22 @@
     margin-bottom:16px;
   }
   .title-block{text-align:left;}
+  /* Fase 39 — pequeño punto amarillo antes de títulos, tomado literalmente
+     del recurso gráfico que abre cada lámina del BRANDBOOK-SAIS USADOS (un
+     círculo amarillo junto al rótulo de sección, presente en las 18 láminas
+     del documento). Se usa como firma de marca discreta y repetida en vez
+     del logo (retirado en Fase 38 a pedido del usuario) — no requiere reglas
+     de tema aparte porque toma el color directamente de --brand-yellow. */
   .title-block h1{font-size:19px; font-weight:700; color:var(--text-primary);}
+  .title-block h1::before{
+    content:"";
+    display:inline-block;
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--brand-yellow);
+    margin-right:8px;
+    vertical-align:middle;
+  }
   .title-block .period{font-size:12.5px; color:var(--text-secondary); margin-top:3px;}
   .header-meta{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
   .pill{
@@ -209,6 +242,15 @@
   .grid-3{display:grid; grid-template-columns: 1.3fr 1fr 1fr; gap:14px; margin-bottom:14px; align-items:stretch;}
 
   .card h2{font-size:14.5px; font-weight:700; color:var(--text-primary); margin-bottom:2px;}
+  .card h2::before{
+    content:"";
+    display:inline-block;
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--brand-yellow);
+    margin-right:7px;
+    vertical-align:middle;
+  }
   .card .card-sub{font-size:11.5px; color:var(--text-muted); margin-bottom:14px;}
   .card-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;}
 
@@ -238,6 +280,9 @@
   .stackbar{position:relative; height:20px; border-radius:6px; overflow:hidden; background:var(--surface-sunken); display:flex;}
   .stackbar .seg{height:100%;}
   .stackbar .seg:not(:last-child){border-right:2px solid var(--surface);}
+  .zr-breakdown{display:flex; gap:12px; margin-top:5px; font-size:11px; color:var(--text-muted); font-variant-numeric:tabular-nums;}
+  .zr-breakdown .li{display:flex; align-items:center; gap:5px;}
+  .zr-breakdown .sw{width:8px;height:8px;border-radius:2px;display:inline-block;}
 
   /* donut — agrandado en Fase 24 (150->180px) para aprovechar mejor el alto
      disponible en tarjetas junto a una lista más larga (ver .card-fill); la
@@ -529,16 +574,6 @@
     <div class="vb-list" id="vbList"></div>
   </div>
 
-  <div class="foot">
-    <span id="footCohorts"></span>
-    <b>Fuente encuestas:</b> NPS Venta Usados &mdash; Grupo Americar, archivo consolidado CR_2025&#8209;Venta&#8209;Usados (enero 2025&ndash;septiembre 2026), filtrado a la razón social Salazar Israel / Clicar Usados (se excluyen Portillo, Coseche y Servimaq). Cada encuesta se asigna al mes de la <b>fecha de venta</b> del vehículo (no la fecha de envío ni de respuesta de la encuesta) &mdash; mismo criterio usado en el cierre oficial de CX. &nbsp;
-    <b>Fuente sucursales:</b> Reporte Gestión NPS VU V2.xlsx, hoja &ldquo;ma_sucursal&rdquo; (maestro vigente, Fase 12) &mdash; cruce por código de sucursal (Código (Texto)); un residual menor de respuestas históricas (~1%, 0 en el cierre de agosto) queda como &ldquo;Sin clasificar&rdquo; por no tener código vigente en el Maestro. &nbsp;
-    <b>Cálculo NPS:</b> % Promotores (9&ndash;10) &minus; % Detractores (0&ndash;6); Neutros = 7&ndash;8. &nbsp;
-    <b>Promotores necesarios:</b> cantidad de <i>nuevas</i> encuestas con calificación Promotora (9&ndash;10) que habría que sumar a la base actual de la sucursal, manteniendo sin cambios los Detractores y respuestas ya registrados, para que el NPS de esa sucursal alcance 80%. Fórmula: N y D actuales se mantienen fijos y N crece con cada promotor nuevo, hasta que (P+x&minus;D)/(N+x) &ge; 80%. &nbsp;
-    <b>Jefatura</b> = Jefe de Ventas de la sucursal, tomado de &ldquo;DATA ACTUAL. JEFES VENTAS Y ZONALES&rdquo; (maestro más actualizado, Fase 34); si una sucursal no aparece ahí o viene sin jefe asignado, se usa como respaldo &ldquo;Jefe sucursal&rdquo; del maestro ma_sucursal. <b>Zonal</b> = responsable regional de VU a cargo de la zona; <b>Supervisor</b> = reporta al Zonal de esa misma zona (dato nuevo, Fase 34 &mdash; algunas zonas aún no tienen Supervisor asignado). &nbsp;
-    <b>Muestra total:</b> total de clientes facturados en el mes seleccionado, tomado del log de invitaciones a encuesta (archivo Estado Encuestas, misma fuente que la pestaña &ldquo;Encuestas Pendientes&rdquo;) &mdash; incluye respondidas, pendientes y envíos fallidos, no solo las encuestas ya respondidas. La columna &ldquo;fecha&rdquo; de ese archivo es la <b>fecha de facturación</b> del vehículo (se usa para que el mes coincida con el resto de esta pestaña); la invitación a responder se envía &sim;24&nbsp;horas después y queda registrada en &ldquo;Fecha de creación&rdquo; (fecha de invitación). <b>Pendientes de respuesta</b> cuenta solo las que siguen vigentes hoy (dentro del plazo de 7 días desde el envío) &mdash; misma definición y misma cifra que &ldquo;Encuestas vigentes hoy&rdquo; en la pestaña &ldquo;Encuestas Pendientes&rdquo; al filtrar esa pestaña por este mismo mes de facturación; por eso puede no coincidir con &ldquo;Muestra total menos Respondidas menos Fallidos&rdquo; (la diferencia son los pendientes cuyo plazo de 7 días ya venció).
-  </div>
-
   </div><!-- /panelNPS -->
 
   <div id="panelPendientes" class="tabpanel" hidden>
@@ -619,18 +654,6 @@
           <tbody id="pendTableBody"></tbody>
         </table>
       </div>
-    </div>
-
-    <div class="foot">
-      <b>Fuente:</b> Estado de Encuestas NPS Venta Usados &mdash; Grupo Americar, archivo ESTADO ENCUESTAS.xlsx (hoja &ldquo;Destinatarios&rdquo;, log de envíos y estado de las invitaciones a encuesta), filtrado a la razón social Salazar Israel / Clicar Usados. &nbsp;
-      <b>Pendiente / vigente</b> = invitación con estado &ldquo;Correo entregado&rdquo;, &ldquo;Correo leído&rdquo;, &ldquo;Enviado&rdquo; o &ldquo;Encuesta abierta&rdquo; (el cliente aún no completa la encuesta), evaluado en tiempo real contra la fecha de hoy. Quedan fuera de esta vista las encuestas ya <b>respondidas</b> y los envíos <b>fallidos</b> (correo rechazado/rebotado/no válido o no enviado). &nbsp;
-      <b>Días</b> = días transcurridos entre la fecha de envío de la invitación y hoy. &nbsp;
-      <b>Días restantes de vigencia</b> = 7 (plazo de vigencia acordado, días corridos desde el envío) menos los días transcurridos; un valor negativo indica que la encuesta ya superó el plazo de 7 días sin ser respondida, aunque su estado siga figurando como pendiente. Por defecto se muestran las encuestas &ldquo;Dentro de plazo&rdquo;; el chip &ldquo;Fuera de plazo&rdquo; agrega un rango de fecha de envío para acotar la búsqueda dentro de ese backlog histórico. &nbsp;
-      <b>Vencen hoy</b> = encuestas cuya fecha de alerta (envío + 7 días) es exactamente hoy. &nbsp;
-      <b>Encuestas perdidas</b> = invitaciones con estado &ldquo;Correo no válido&rdquo;, &ldquo;Correo rebotado&rdquo;, &ldquo;Correo rechazado&rdquo; o &ldquo;No enviado&rdquo; — nunca llegaron a completarse y no son accionables (no aplica el chip de plazo, que es solo para el estado &ldquo;Pendiente&rdquo;). &nbsp;
-      <b>Sucursal / Zona / Vendedor</b> = cruce por código de concesionario contra el Maestro de Sucursales; casos sin código vigente quedan como &ldquo;Sin clasificar&rdquo;. &nbsp;
-      <b>Mes de facturación</b> (filtro opcional) = mes de la columna &ldquo;fecha&rdquo; del archivo Estado Encuestas (fecha de facturación del vehículo, no fecha de envío de la invitación); por defecto queda en &ldquo;todos&rdquo; y muestra el backlog histórico completo. Al seleccionar un mes, esta pestaña queda comparable con la card &ldquo;Universo de encuestas&rdquo; de la pestaña NPS para ese mismo mes. &nbsp;
-      <span id="pTableCapNote"></span>
     </div>
 
   </div><!-- /panelPendientes -->
@@ -811,19 +834,6 @@
           <tbody id="cPendTableBody"></tbody>
         </table>
       </div>
-    </div>
-
-    <div class="foot">
-      <b>Fuente:</b> Panel Checklist de Entrega Digital Americar &mdash; segmento Usados (VU), hoja &ldquo;Oportunidades&rdquo; (base transaccional, acumulada desde enero 2026 a la fecha). Mes = mes de &ldquo;Fecha disponible&rdquo; (fecha de entrega, o de disponibilidad para retiro si aún no se entrega). &nbsp;
-      <b>Total Checklist Firmados</b> = oportunidades que firmaron checklist digital o subieron uno manual, pasando a estado &ldquo;Entrega&rdquo;. &nbsp;
-      <b>Firma Manual / Firma Digital</b> = checklist subido a Llaima de forma manual o generado automáticamente por firma digital. &nbsp;
-      <b>Adhesión Digital</b> = % de checklists firmados digitalmente sobre el total de firmados. &nbsp;
-      <b>Adhesión al Checklist</b> = % de checklists firmados (manual o digital) sobre el total de unidades entregadas más las disponibles para entrega, usando &ldquo;Disponible para entrega ácida&rdquo; (snapshot a la fecha de extracción, misma metodología que el reporte oficial y que la tarjeta &ldquo;Avance a la fecha&rdquo;). Por ser un snapshot vivo, meses cerrados tienden a ~99-100% de adhesión a medida que su backlog se resuelve con el tiempo. &nbsp;
-      <b>Alerta 5 días</b> = unidades disponibles para entrega hace más de 5 días sin checklist registrado (estimado). &nbsp;
-      <b>Jefatura</b> = Jefe de ventas de la sucursal (cruce por código de sucursal contra el Maestro de Sucursales y Talleres, hoja VU); <b>Vendedor</b> = ejecutivo responsable de la oportunidad. &nbsp;
-      <b>Días prom. / Días máx.</b> = promedio y máximo de días que las unidades pendientes de ese vendedor/sucursal llevan disponibles sin checklist registrado. &nbsp;
-      <span id="cSinFechaWrap">Adicionalmente, <b id="cSinFechaCount">&mdash;</b> unidades no tienen aún fecha de disponibilidad asignada y quedan fuera del filtro de mes.</span> &nbsp;
-      <span id="cPrevWrap">Mes anterior (<span id="cPrevLabelMonth">&mdash;</span>): <span id="cPrevLabel">&mdash;</span>.</span>
     </div>
 
   </div><!-- /panelChecklist -->
@@ -2445,7 +2455,8 @@ function renderFootCohorts(){
   }
   const prevText = `<b>Cohorte ${prevLabel} (comparación):</b> mismo criterio de fecha de venta (${prevN} respuestas).`;
 
-  document.getElementById('footCohorts').innerHTML = `${curText} &nbsp; ${prevText} &nbsp;`;
+  const footCohortsEl = document.getElementById('footCohorts');
+  if(footCohortsEl) footCohortsEl.innerHTML = `${curText} &nbsp; ${prevText} &nbsp;`;
 }
 
 function renderAll(){
@@ -2605,6 +2616,11 @@ function cRenderKPIs(rows){
 }
 
 function cRenderZonaRows(){
+  // Fase 36: mismo cambio que en "Adhesión por zona" (pestaña Checklist,
+  // vista a la fecha) — el número principal pasa de "% digital" a "% adhesión
+  // al proceso" (firmados / (firmados + disponibles), misma fórmula que la
+  // card "Adhesión al checklist" de esta misma vista mensual), y el desglose
+  // manual/digital se muestra también como porcentaje en texto pequeño.
   const el = document.getElementById('cZonaRows');
   const filtered = cApplyFilter('zona');
   const zonasPresent = new Set(filtered.map(r=>r.zona));
@@ -2612,17 +2628,24 @@ function cRenderZonaRows(){
   if(!zonas.length){ el.innerHTML = '<div class="vb-empty">Sin datos para este filtro.</div>'; return; }
   el.innerHTML = zonas.map(z=>{
     const a = cAggregate(filtered.filter(r=>r.zona===z));
+    const mPct = a.entregadas? Math.round(a.manual/a.entregadas*100) : 0;
+    const dPct = a.entregadas? Math.round(a.digital/a.entregadas*100) : 0;
     const mw = a.entregadas? a.manual/a.entregadas*100 : 0;
     const dw = a.entregadas? a.digital/a.entregadas*100 : 0;
-    const adhColor = a.adhDigital===null?'var(--text-muted)':(a.adhDigital>=0.7?'var(--good)':a.adhDigital>=0.5?'var(--warning)':'var(--critical)');
+    const adhChkPct = a.adhChecklist===null? null : Math.round(a.adhChecklist*100);
+    const adhColor = adhChkPct===null?'var(--text-muted)':(adhChkPct>=90?'var(--good)':adhChkPct>=70?'var(--warning)':'var(--critical)');
     return `<div class="zona-row">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:var(${ZONA_VAR[z]})"></span>${z}<span class="zr-n">n=${a.entregadas} firmados</span></div>
-        <div class="zr-nps" style="color:${adhColor}">${fmtPct(a.adhDigital===null?null:Math.round(a.adhDigital*100))} digital</div>
+        <div class="zr-nps" style="color:${adhColor}">${adhChkPct===null?'—':fmtPct(adhChkPct)} adhesión</div>
       </div>
-      <div class="stackbar" title="${a.manual} manual · ${a.digital} digital">
+      <div class="stackbar" title="${a.manual} manual (${mPct}%) · ${a.digital} digital (${dPct}%)">
         ${a.manual?`<div class="seg" style="width:${mw}%;background:var(--warning)"></div>`:''}
         ${a.digital?`<div class="seg" style="width:${dw}%;background:var(--good)"></div>`:''}
+      </div>
+      <div class="zr-breakdown">
+        <span class="li"><span class="sw" style="background:var(--warning)"></span>${mPct}% manual</span>
+        <span class="li"><span class="sw" style="background:var(--good)"></span>${dPct}% digital</span>
       </div>
     </div>`;
   }).join('');
@@ -2836,18 +2859,21 @@ function cRenderAll(){
     noteEl.style.display = 'none';
   }
 
-  document.getElementById('cSinFechaCount').textContent = CHECKLIST_SIN_FECHA.sin_fecha_count;
+  const sinFechaCountEl = document.getElementById('cSinFechaCount');
+  if(sinFechaCountEl) sinFechaCountEl.textContent = CHECKLIST_SIN_FECHA.sin_fecha_count;
 
   const prevKey = cPrevMonthKey(cstate.month);
   const prevWrap = document.getElementById('cPrevWrap');
-  if(prevKey && CHECKLIST_BY_MONTH[prevKey]){
-    const prevMeta = cMonthMeta(prevKey);
-    const prevTotal = cAggregate(CHECKLIST_BY_MONTH[prevKey]);
-    document.getElementById('cPrevLabelMonth').textContent = prevMeta ? prevMeta.label : prevKey;
-    document.getElementById('cPrevLabel').textContent = `${prevTotal.entregadas} checklists firmados (${prevTotal.adhDigital===null?'N/D':Math.round(prevTotal.adhDigital*100)+'%'} digital, ${prevTotal.adhChecklist===null?'N/D':Math.round(prevTotal.adhChecklist*100)+'%'} adhesión)`;
-    prevWrap.hidden = false;
-  } else {
-    prevWrap.hidden = true;
+  if(prevWrap){
+    if(prevKey && CHECKLIST_BY_MONTH[prevKey]){
+      const prevMeta = cMonthMeta(prevKey);
+      const prevTotal = cAggregate(CHECKLIST_BY_MONTH[prevKey]);
+      document.getElementById('cPrevLabelMonth').textContent = prevMeta ? prevMeta.label : prevKey;
+      document.getElementById('cPrevLabel').textContent = `${prevTotal.entregadas} checklists firmados (${prevTotal.adhDigital===null?'N/D':Math.round(prevTotal.adhDigital*100)+'%'} digital, ${prevTotal.adhChecklist===null?'N/D':Math.round(prevTotal.adhChecklist*100)+'%'} adhesión)`;
+      prevWrap.hidden = false;
+    } else {
+      prevWrap.hidden = true;
+    }
   }
 }
 
@@ -2905,21 +2931,34 @@ function tRenderKPIs(){
 }
 
 function tRenderZonaRows(){
+  // Fase 36: el número principal de cada fila de zona pasó de "% digital" a
+  // "% adhesión al proceso" (firmados / disponibles para entrega) — la misma
+  // métrica y umbrales que la card "Adhesión al checklist" — porque el título
+  // de la sección es "Adhesión por zona" y el usuario pidió que muestre la
+  // adhesión al proceso, no la adhesión digital. El desglose manual/digital
+  // (antes solo visible como ancho de barra + tooltip) ahora también se
+  // muestra como texto pequeño con sus porcentajes explícitos.
   const zonas = ZONA_ORDER.filter(z => CHECKLIST_TODAY.zonas.some(zz=>zz.zona===z));
   document.getElementById('tZonaRows').innerHTML = zonas.map(z=>{
     const a = CHECKLIST_TODAY.zonas.find(zz=>zz.zona===z);
+    const mPct = a.firmados? Math.round(a.manual/a.firmados*100) : 0;
+    const dPct = a.firmados? Math.round(a.digital/a.firmados*100) : 0;
     const mw = a.firmados? a.manual/a.firmados*100 : 0;
     const dw = a.firmados? a.digital/a.firmados*100 : 0;
-    const adhPct = Math.round(a.adh_digital*100);
-    const adhColor = adhPct>=70?'var(--good)':adhPct>=50?'var(--warning)':'var(--critical)';
+    const adhChkPct = a.adh_checklist===null||a.adh_checklist===undefined ? null : Math.round(a.adh_checklist*100);
+    const adhColor = adhChkPct===null?'var(--text-muted)':(adhChkPct>=90?'var(--good)':adhChkPct>=70?'var(--warning)':'var(--critical)');
     return `<div class="zona-row">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:var(${ZONA_VAR[z]})"></span>${z}<span class="zr-n">n=${a.firmados} firmados</span></div>
-        <div class="zr-nps" style="color:${adhColor}">${fmtPct(adhPct)} digital</div>
+        <div class="zr-nps" style="color:${adhColor}">${adhChkPct===null?'—':fmtPct(adhChkPct)} adhesión</div>
       </div>
-      <div class="stackbar" title="${a.manual} manual · ${a.digital} digital">
+      <div class="stackbar" title="${a.manual} manual (${mPct}%) · ${a.digital} digital (${dPct}%)">
         ${a.manual?`<div class="seg" style="width:${mw}%;background:var(--warning)"></div>`:''}
         ${a.digital?`<div class="seg" style="width:${dw}%;background:var(--good)"></div>`:''}
+      </div>
+      <div class="zr-breakdown">
+        <span class="li"><span class="sw" style="background:var(--warning)"></span>${mPct}% manual</span>
+        <span class="li"><span class="sw" style="background:var(--good)"></span>${dPct}% digital</span>
       </div>
     </div>`;
   }).join('');
@@ -3307,7 +3346,7 @@ function pRenderTable(rows){
     if(th.dataset.key===sortKey) arrow.textContent = sortDir==='asc' ? '▴':'▾';
   });
   const capNote = document.getElementById('pTableCapNote');
-  capNote.textContent = total>P_TABLE_CAP ? `Mostrando los ${P_TABLE_CAP} casos según el orden actual, de ${total} encuestas vigentes en este filtro; use los filtros o la búsqueda para acotar la vista.` : '';
+  if(capNote) capNote.textContent = total>P_TABLE_CAP ? `Mostrando los ${P_TABLE_CAP} casos según el orden actual, de ${total} encuestas vigentes en este filtro; use los filtros o la búsqueda para acotar la vista.` : '';
 }
 
 function pRenderAll(){
