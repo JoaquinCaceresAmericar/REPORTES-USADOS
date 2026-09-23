@@ -420,6 +420,7 @@
     </div>
     <div class="header-meta">
       <span class="pill">Encuestas respondidas <b id="hdrTotal">&mdash;</b></span>
+      <span class="pill" id="hdrTasaRespPill">Tasa respuesta <b id="hdrTasaResp">&mdash;</b></span>
       <span class="pill nps-good">NPS global <b id="hdrNPS">&mdash;</b></span>
       <span class="pill" id="hdrDeltaPill">vs. <span id="hdrDeltaLabel">julio</span> <b id="hdrDelta">&mdash;</b></span>
       <span class="pill" id="hdrVigentesPill">Encuestas vigentes <b id="hdrVigentes">&mdash;</b></span>
@@ -454,7 +455,6 @@
     <div class="card-head">
       <div>
         <h2>Universo de encuestas</h2>
-        <div class="card-sub" id="muestraSub">Cargando&hellip;</div>
       </div>
     </div>
     <div class="kpi-row" id="muestraKpiRow" style="margin-bottom:0;"></div>
@@ -1899,7 +1899,7 @@ function renderRecompra(rows){
 }
 
 function renderEvoChart(){
-  // Fase 35: antes esta serie venía pre-agregada desde Python (MONTHLY.overall/
+  // Fase 35: antes está serie venía pre-agregada desde Python (MONTHLY.overall/
   // by_zone, que solo cubrían Ene-Ago) más un "sep_partial" calculado SOLO a
   // nivel global — por eso, al filtrar por zona, Septiembre desaparecía (no
   // existía un sep_partial por zona, y mucho menos por sucursal/jefatura).
@@ -2238,7 +2238,7 @@ function renderMomPanel(rows, rowsPrev){
       </div>
       <div class="kpi" style="flex:1; min-width:110px;">
         <div class="k-label">Variación NPS</div>
-        <div class="k-value" style="font-size:24px; color:${dColor};">${deltaNps===null?'&mdash;':(arrow+Math.abs(deltaNps)+' pts')}</div>
+        <div class="k-value" style="font-size:24px; color:${dColor};">${deltaNps===null?'&mdash;':(arrow+Math.abs(deltaNps)+' pts')}</div>
         <div class="k-sub">${deltaN>=0?'+':''}${deltaN} respuestas</div>
       </div>
     </div>
@@ -2421,6 +2421,16 @@ function renderHeaderKPIs(){
 
   document.getElementById('hdrTotal').textContent = cur.n;
   document.getElementById('hdrNPS').textContent = fmtPct(cur.nps);
+
+  // Fase 41 — "Tasa respuesta" en el header (pedido del usuario): misma
+  // definición que la tile "Tasa de respuesta" de "Universo de encuestas"
+  // (respondidas / total enviado, todos los estados), pero — como el resto
+  // del header (Fase 22) — fija siempre al mes en curso/parcial (latestKey),
+  // sin aplicar los filtros de zona/sucursal/jefatura de la pestaña NPS.
+  const tasaRespSeg = PENDING_DATA.filter(r=>(r.fecha_facturacion||'').slice(0,7)===latestKey);
+  const tasaRespTotal = tasaRespSeg.length;
+  const tasaRespRespondidas = tasaRespSeg.filter(r=>r.grupo==='Respondida').length;
+  document.getElementById('hdrTasaResp').textContent = tasaRespTotal ? Math.round(tasaRespRespondidas/tasaRespTotal*100)+'%' : '—';
 
   const deltaNps = (cur.nps!==null && prev.nps!==null) ? cur.nps-prev.nps : null;
   const dColor = deltaNps===null?'var(--text-muted)':(deltaNps>0?'var(--good)':deltaNps<0?'var(--critical)':'var(--text-secondary)');
@@ -3141,8 +3151,15 @@ function renderMuestraTotal(){
   const pct = (x)=> total ? Math.round(x/total*100)+'%' : '—';
   const meta = monthMeta(state.month);
   const label = meta ? meta.label : state.month;
+  // Fase 41 — "Tasa de respuesta" (pedido del usuario): respondidas sobre el
+  // total de encuestas enviadas a la fecha, incluyendo TODOS los estados
+  // (respondida + pendiente + fallido) — es exactamente `total` (ya calculado
+  // arriba desde PENDING_DATA sin excluir ningún grupo), así que es el mismo
+  // valor que ya se mostraba como "% de la muestra" bajo Encuestas
+  // respondidas, ahora también como tile propio.
   const kpis = [
     {label:'Muestra total', value: total, sub:`clientes facturados en ${label}`, hero:true},
+    {label:'Tasa de respuesta', value: pct(respondidas), sub: `${respondidas} de ${total} encuestas enviadas`},
     {label:'Encuestas respondidas', value: respondidas, sub: `${pct(respondidas)} de la muestra`},
     {label:'Pendientes de respuesta', value: pendientesVigentes, sub: `vigentes hoy, dentro de plazo (&le;${VIGENCIA_DAYS}d)`},
     {label:'Envíos fallidos', value: fallidas, sub: `${pct(fallidas)} de la muestra`, color: fallidas>0?'var(--critical)':''},
@@ -3153,8 +3170,6 @@ function renderMuestraTotal(){
       <div class="k-value" style="${k.color?`color:${k.color}`:''}">${k.value}</div>
       <div class="k-sub">${k.sub}</div>
     </div>`).join('');
-  document.getElementById('muestraSub').textContent =
-    `Todos los clientes facturados en ${label} (log de invitaciones a encuesta, archivo Estado Encuestas) — incluye a quienes ya respondieron, siguen pendientes o el envío falló, no solo las encuestas respondidas. La invitación se envía ~24 horas después de la fecha de facturación. "Pendientes de respuesta" muestra solo las que siguen vigentes hoy (dentro del plazo de ${VIGENCIA_DAYS} días desde el envío) — misma definición que "Encuestas vigentes hoy" en la pestaña Encuestas Pendientes, filtrando esa pestaña por este mismo mes de facturación.`;
 }
 
 const ESTADO_ORDER = ['Enviado','Correo entregado','Correo leído','Encuesta abierta'];
