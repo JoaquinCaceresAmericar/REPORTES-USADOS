@@ -3148,6 +3148,15 @@ function renderMuestraTotal(){
   // los 4 tiles ya no tiene por qué dar exactamente el total de la muestra).
   const pendientesVigentes = seg.filter(r=>r.grupo==='Pendiente' && r._diasRestantes!==null && r._diasRestantes>=0).length;
   const fallidas = seg.filter(r=>r.grupo==='Fallido').length;
+  // Fase 44 — "Encuestas vencidas" (pedido del usuario, sexta tile de la card):
+  // pendientes que ya superaron el plazo de 7 días desde el envío sin
+  // respuesta (_diasRestantes<0) — el complemento exacto de "Pendientes de
+  // respuesta" (que solo cuenta las vigentes) dentro del grupo Pendiente.
+  // Con esta tile, Respondidas + Pendientes de respuesta + Encuestas vencidas
+  // + Envíos fallidos vuelve a sumar exactamente el total de la muestra (ver
+  // nota de Fase 32 más arriba, que dejó de cumplirse al excluir el backlog
+  // vencido de "Pendientes de respuesta").
+  const vencidas = seg.filter(r=>r.grupo==='Pendiente' && r._diasRestantes!==null && r._diasRestantes<0).length;
   const pct = (x)=> total ? Math.round(x/total*100)+'%' : '—';
   const meta = monthMeta(state.month);
   const label = meta ? meta.label : state.month;
@@ -3162,6 +3171,7 @@ function renderMuestraTotal(){
     {label:'Tasa de respuesta', value: pct(respondidas), sub: `${respondidas} de ${total} encuestas enviadas`},
     {label:'Encuestas respondidas', value: respondidas, sub: `${pct(respondidas)} de la muestra`},
     {label:'Pendientes de respuesta', value: pendientesVigentes, sub: `vigentes hoy, dentro de plazo (&le;${VIGENCIA_DAYS}d)`},
+    {label:'Encuestas vencidas', value: vencidas, sub: `${pct(vencidas)} de la muestra &mdash; fuera de plazo (&gt;${VIGENCIA_DAYS}d)`, color: vencidas>0?'var(--critical)':''},
     {label:'Envíos fallidos', value: fallidas, sub: `${pct(fallidas)} de la muestra`, color: fallidas>0?'var(--critical)':''},
   ];
   document.getElementById('muestraKpiRow').innerHTML = kpis.map((k,i)=>`
