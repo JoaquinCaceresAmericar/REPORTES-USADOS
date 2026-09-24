@@ -2411,6 +2411,13 @@ function renderMomPanel(rows, rowsPrev){
   const isFiltered = state.zona || state.sucursal || state.jefatura;
   const moves = computeSucMoves(curMonthData(), prevMonthData());
   const movesEmpty = '<div class="vb-empty" style="font-size:12px;">Sin sucursales con n&ge;3 en ambos meses.</div>';
+  // Fase 50 — "Mayores caídas" solo debe listar sucursales que realmente
+  // cayeron (delta<0). moves.worst son los 5 deltas más bajos sin importar
+  // signo, así que si hay menos de 5 sucursales con caída real, se rellenaba
+  // con sucursales en 0 pts (sin movimiento) — pedido explícito del usuario
+  // de no mostrar esos casos como si fueran una caída.
+  const fallers = moves.worst.filter(m=>m.delta<0);
+  const movesEmptyFallers = '<div class="vb-empty" style="font-size:12px;">Ninguna sucursal cayó vs. el mes anterior (n&ge;3 en ambos meses).</div>';
   el.innerHTML = `
     <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:6px;">
       <div class="kpi" style="flex:1; min-width:110px;">
@@ -2447,7 +2454,7 @@ function renderMomPanel(rows, rowsPrev){
     </div>
     <div class="card-sub" style="margin-top:2px; margin-bottom:6px;">Mayores movimientos por sucursal &mdash; vista global sin filtrar, n&ge;3 en ambos meses${isFiltered?' <span style="color:var(--text-muted);">(no reactivo a los filtros)</span>':''}</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-      <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--critical); margin-bottom:4px;">Mayores caídas</div>${moves.worst.length?moves.worst.map(momRow).join(''):movesEmpty}</div>
+      <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--critical); margin-bottom:4px;">Mayores caídas</div>${fallers.length?fallers.map(momRow).join(''):movesEmptyFallers}</div>
       <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--good); margin-bottom:4px;">Mayores subidas</div>${moves.best.length?moves.best.map(momRow).join(''):movesEmpty}</div>
     </div>`;
 }
