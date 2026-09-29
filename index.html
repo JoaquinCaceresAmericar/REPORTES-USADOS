@@ -640,6 +640,17 @@
     <div class="card" style="margin-bottom:14px;">
       <div class="card-head">
         <div>
+          <h2>Evolutivo de respuesta de encuestas</h2>
+          <div class="card-sub">Encuestas respondidas por día &middot; mismo segmento filtrado arriba (mes de facturación/zona/sucursal/vendedor)</div>
+        </div>
+      </div>
+      <div id="pEvoChart"></div>
+      <div class="card-sub" id="pEvoNote" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-head">
+        <div>
           <h2>Detalle de encuestas pendientes</h2>
           <div class="card-sub">Ordena por columna &middot; <span id="pTableSubcount"></span></div>
         </div>
@@ -3770,12 +3781,100 @@ function pRenderLostTable(){
   if(capNote) capNote.textContent = total>P_LOST_TABLE_CAP ? `Mostrando los ${P_LOST_TABLE_CAP} casos según el orden actual, de ${total} encuestas perdidas en este filtro; use los filtros o la búsqueda para acotar la vista.` : '';
 }
 
+// Fase 56 — "Evolutivo de respuesta de encuestas" (pedido del usuario): cuántas
+// encuestas se respondieron cada día, para revisar en qué días hubo más o menos
+// respuestas. PENDING_DATA (ESTADO ENCUESTAS.xlsx) NO trae una fecha de
+// respuesta por registro — solo fecha de envío de la invitación (ver
+// extract3.py, bloque de pending_records) — así que este gráfico usa la base
+// de encuestas RESPONDIDAS (DATA_BY_MONTH/ALL_NPS_ROWS, que sí trae
+// fecha_respuesta por encuesta), acotada al mismo segmento de mes de
+// facturación/zona/sucursal/vendedor activo en esta pestaña (pstate). No
+// aplica el chip de plazo ni el rango de fechas (son propios del backlog de
+// pendientes) ni la búsqueda de cliente (ese campo no existe en la base de
+// respuestas).
+function isoLocal(d){
+  const pad = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function pEvoBaseRows(){
+  const rows = pstate.month ? (DATA_BY_MONTH[pstate.month]||[]) : ALL_NPS_ROWS;
+  return rows.filter(r=>{
+    if(!r.fecha_respuesta) return false;
+    if(pstate.zona && r.zona!==pstate.zona) return false;
+    if(pstate.sucursal && r.sucursal!==pstate.sucursal) return false;
+    if(pstate.vendedor && r.vendedor!==pstate.vendedor) return false;
+    return true;
+  });
+}
+function pRenderEvoChart(){
+  const wrap = document.getElementById('pEvoChart');
+  const note = document.getElementById('pEvoNote');
+  const rows = pEvoBaseRows();
+  const counts = {};
+  rows.forEach(r=>{ counts[r.fecha_respuesta] = (counts[r.fecha_respuesta]||0) + 1; });
+  const seenDates = Object.keys(counts).sort();
+  if(!seenDates.length){
+    wrap.innerHTML = '<div class="vb-empty">Sin encuestas respondidas para este filtro.</div>';
+    note.textContent = '';
+    return;
+  }
+  // Completa los días sin salto (incluye días con 0 respuestas) entre el primer
+  // y el último día con datos, para que la forma del gráfico refleje huecos
+  // reales de respuesta en vez de saltar directo de un día activo al siguiente.
+  const start = new Date(seenDates[0]+'T00:00:00');
+  const end = new Date(seenDates[seenDates.length-1]+'T00:00:00');
+  const days = [];
+  for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    const key = isoLocal(d);
+    days.push({date:key, count: counts[key]||0});
+  }
+  const n = days.length;
+  const w = 900, h = 200, padL = 32, padR = 10, padT = 24, padB = 26;
+  const innerW = w-padL-padR, innerH = h-padT-padB;
+  const maxCount = Math.max(...days.map(d=>d.count), 1);
+  const slot = innerW/n;
+  const barW = Math.max(1.2, slot - 2);
+  const rx = Math.min(2, barW/2);
+  const xAt = i => padL + i*slot;
+  const yAt = v => padT + innerH - (v/maxCount)*innerH;
+  const gridYs = [...new Set([0, Math.round(maxCount/2), maxCount])];
+  const gridSvg = gridYs.map(v=>`<line x1="${padL}" x2="${w-padR}" y1="${yAt(v)}" y2="${yAt(v)}" stroke="var(--gridline)" stroke-width="1"/><text x="${padL-6}" y="${yAt(v)+3}" font-size="9" text-anchor="end" fill="var(--text-muted)">${v}</text>`).join('');
+  // Como mucho ~10 etiquetas de fecha en el eje X, repartidas parejo, para que
+  // no se amontonen cuando el rango cubre varias semanas o meses (p. ej. con
+  // "Mes de facturación: todos").
+  const labelEvery = Math.max(1, Math.ceil(n/10));
+  // Número sobre cada barra con la cantidad de encuestas, para verla a simple
+  // vista sin pasar el mouse. Con rangos muy anchos (p. ej. "todos", ~270 días)
+  // las barras quedan demasiado angostas para que el número quepa sin
+  // amontonarse con el vecino, así que el valor se omite bajo ese ancho mínimo
+  // (el tooltip por barra sigue disponible al pasar el mouse).
+  const minSlotForValue = 18;
+  const showValues = slot >= minSlotForValue;
+  const peak = days.reduce((a,b)=>b.count>a.count?b:a, days[0]);
+  const fmtDay = key=>{ const [,m,d] = key.split('-'); return `${d}-${m}`; };
+  const bars = days.map((d,i)=>{
+    const x = xAt(i), y = yAt(d.count), bh = Math.max((padT+innerH) - y, 0);
+    const isPeak = peak.count>0 && d.count===peak.count;
+    const fill = isPeak ? 'var(--brand-blue-ink)' : 'var(--brand-blue)';
+    const label = (i%labelEvery===0 || i===n-1) ? `<text x="${x+barW/2}" y="${h-8}" font-size="8.5" text-anchor="middle" fill="var(--text-muted)">${fmtDay(d.date)}</text>` : '';
+    const value = (showValues && d.count>0) ? `<text x="${x+barW/2}" y="${(y-4).toFixed(2)}" font-size="8.5" text-anchor="middle" fill="${isPeak?'var(--brand-blue-ink)':'var(--text-secondary,var(--text-muted))'}" font-weight="${isPeak?'700':'500'}">${d.count}</text>` : '';
+    return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barW.toFixed(2)}" height="${bh.toFixed(2)}" rx="${rx.toFixed(2)}" fill="${fill}"><title>${fmtDay(d.date)}: ${d.count} encuesta${d.count===1?'':'s'} respondida${d.count===1?'':'s'}</title></rect>${value}${label}`;
+  }).join('');
+  wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">${gridSvg}${bars}</svg>`;
+  const total = days.reduce((s,d)=>s+d.count,0);
+  const avg = (total/n).toFixed(1);
+  const mesMeta = pstate.month ? monthMeta(pstate.month) : null;
+  const mesTxt = mesMeta ? ` en ${mesMeta.label}` : ' en el histórico disponible';
+  note.innerHTML = `<b>${total}</b> encuestas respondidas${mesTxt} &middot; promedio <b>${avg}</b>/día &middot; día con más respuestas: <b>${fmtDay(peak.date)}</b> (${peak.count})`;
+}
+
 function pRenderAll(){
   pRebuildFilterOptions();
   const rows = pApplyFilter();
   pRenderKPIs(rows);
   pRenderZonaRows(rows);
   pRenderDonut(rows);
+  pRenderEvoChart();
   pRenderTable(rows);
   pRenderLostTable();
 
