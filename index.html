@@ -388,6 +388,7 @@
   }
   .vb-meta{color:var(--text-muted); font-weight:600;}
   .vb-meta b{color:var(--text-secondary);}
+  .vb-date{color:var(--text-muted); font-weight:600; margin-left:auto; white-space:nowrap;}
   .vb-text{font-size:13px; color:var(--text-primary); line-height:1.45;}
   .vb-empty{color:var(--text-muted); font-size:13px; padding:20px 0; text-align:center;}
 
@@ -2662,6 +2663,12 @@ function renderVerbatims(rows){
   // Fase 58 — a pedido del usuario se reemplaza la jefatura por el nombre del
   // cliente (campo "cliente", agregado en extract3.py desde la columna
   // "nombre" del extracto de encuestas) y se mantiene el vendedor.
+  // Fase 60 — a pedido del usuario se agrega la fecha de respuesta de la
+  // encuesta (campo "fecha_respuesta", ya extraído desde antes en extract3.py
+  // pero no mostrado en esta card), alineada a la derecha del encabezado de
+  // cada comentario, en formato DD-MM-YYYY (consistente con "Fecha de hoy"
+  // del encabezado general, a diferencia de las tablas de detalle que usan
+  // ISO — acá se prioriza lectura rápida, no orden/columna).
   let list = rows.filter(r=>r.motivo);
   if(state.vbCat!=='all') list = list.filter(r=>r.cat===state.vbCat);
   if(state.vbSearch){
@@ -2673,10 +2680,12 @@ function renderVerbatims(rows){
   if(!list.length){ el.innerHTML = '<div class="vb-empty">No hay comentarios para este filtro.</div>'; return; }
   el.innerHTML = list.map(r=>{
     const color = STATUS_HEX_LIGHT[r.cat];
+    const fechaResp = r.fecha_respuesta ? r.fecha_respuesta.split('-').reverse().join('-') : null;
     return `<div class="vb-item">
       <div class="vb-top">
         <span class="vb-score" style="background:${color}">${r.score}</span>
         <span class="vb-meta"><b>${r.cliente||'Cliente sin nombre'}</b> &middot; ${r.sucursal} &middot; ${r.zona}${r.vendedor?(' &middot; '+r.vendedor):''}</span>
+        ${fechaResp ? `<span class="vb-date">Respondida: ${fechaResp}</span>` : ''}
       </div>
       <div class="vb-text">&ldquo;${r.motivo}&rdquo;</div>
     </div>`;
