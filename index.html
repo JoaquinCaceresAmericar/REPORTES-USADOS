@@ -197,7 +197,7 @@
     margin-bottom:10px;
   }
   .freshness-note b{color:var(--text-secondary); font-weight:700;}
-  .filterbar .flabel{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-right:2px;}
+  .filterbar .flabel, .vb-controls .flabel{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-right:2px;}
   select.fselect{
     appearance:none; -webkit-appearance:none;
     font:inherit; font-size:13px; font-weight:600; color:var(--text-primary);
@@ -584,6 +584,11 @@
       <button class="chip" data-cat="Neutro">Neutros</button>
       <button class="chip" data-cat="Detractor">Detractores</button>
       <input class="vb-search" id="vbSearch" type="text" placeholder="Buscar por cliente, sucursal o texto del comentario...">
+      <span class="flabel">Respondida entre</span>
+      <input type="date" id="vbDesde" class="vb-search" style="flex:0 0 145px; min-width:0;">
+      <span class="flabel" style="text-transform:none; font-weight:600;">y</span>
+      <input type="date" id="vbHasta" class="vb-search" style="flex:0 0 145px; min-width:0;">
+      <button class="reset-btn" id="vbBtnResetFecha">Limpiar fechas</button>
     </div>
     <div class="vb-list" id="vbList"></div>
   </div>
@@ -1888,7 +1893,7 @@ function zonaDotColor(zona){
   return zv ? `var(${zv})` : 'var(--text-muted)';
 }
 
-const state = { month: DEFAULT_MONTH, zona:'', sucursal:'', jefatura:'', vbCat:'all', vbSearch:'', sortKey:'nps', sortDir:'desc' };
+const state = { month: DEFAULT_MONTH, zona:'', sucursal:'', jefatura:'', vbCat:'all', vbSearch:'', vbDesde:'', vbHasta:'', sortKey:'nps', sortDir:'desc' };
 
 function monthMeta(key){ return MONTHS_META.find(m=>m.key===key); }
 function prevMonthKey(key){
@@ -2669,13 +2674,21 @@ function renderVerbatims(rows){
   // cada comentario, en formato DD-MM-YYYY (consistente con "Fecha de hoy"
   // del encabezado general, a diferencia de las tablas de detalle que usan
   // ISO — acá se prioriza lectura rápida, no orden/columna).
+  // Fase 61 — a pedido del usuario se agrega un filtro de rango de fechas
+  // (por fecha de respuesta, campo ISO "fecha_respuesta") con inputs
+  // <input type="date"> que entregan string YYYY-MM-DD, comparable
+  // directamente contra el campo sin parsear. Además el orden por defecto
+  // pasa de "peor NPS primero" (score ascendente) a "más reciente primero"
+  // (fecha_respuesta descendente); un comentario sin fecha se envía al final.
   let list = rows.filter(r=>r.motivo);
   if(state.vbCat!=='all') list = list.filter(r=>r.cat===state.vbCat);
   if(state.vbSearch){
     const q = state.vbSearch.toLowerCase();
     list = list.filter(r=> (r.motivo||'').toLowerCase().includes(q) || r.sucursal.toLowerCase().includes(q) || (r.cliente||'').toLowerCase().includes(q));
   }
-  list.sort((a,b)=>a.score-b.score);
+  if(state.vbDesde) list = list.filter(r=>r.fecha_respuesta && r.fecha_respuesta >= state.vbDesde);
+  if(state.vbHasta) list = list.filter(r=>r.fecha_respuesta && r.fecha_respuesta <= state.vbHasta);
+  list.sort((a,b)=>(b.fecha_respuesta||'').localeCompare(a.fecha_respuesta||''));
   const el = document.getElementById('vbList');
   if(!list.length){ el.innerHTML = '<div class="vb-empty">No hay comentarios para este filtro.</div>'; return; }
   el.innerHTML = list.map(r=>{
@@ -2818,6 +2831,23 @@ document.querySelectorAll('.vb-controls .chip').forEach(chip=>{
 });
 document.getElementById('vbSearch').addEventListener('input', e=>{
   state.vbSearch = e.target.value;
+  renderVerbatims(applyFilters());
+});
+// Fase 61 — filtro de rango de fechas (respuesta de la encuesta) en
+// "Encuestas respondidas", con botón para limpiar ambos extremos a la vez.
+document.getElementById('vbDesde').addEventListener('change', e=>{
+  state.vbDesde = e.target.value;
+  renderVerbatims(applyFilters());
+});
+document.getElementById('vbHasta').addEventListener('change', e=>{
+  state.vbHasta = e.target.value;
+  renderVerbatims(applyFilters());
+});
+document.getElementById('vbBtnResetFecha').addEventListener('click', ()=>{
+  state.vbDesde = '';
+  state.vbHasta = '';
+  document.getElementById('vbDesde').value = '';
+  document.getElementById('vbHasta').value = '';
   renderVerbatims(applyFilters());
 });
 
