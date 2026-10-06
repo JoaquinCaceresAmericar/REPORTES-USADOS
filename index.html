@@ -25,6 +25,11 @@
     --brand-magenta:   #c73883; /* PANTONE 233 U */
     --brand-green:     #5aa616;
     --accent-wash:     #e7f0f8;
+    /* Fase 70 — colores oficiales de Microsoft Excel para el botón de
+       descarga (verde #107C41, igual en ambos temas; el "wash" de fondo
+       sí se adapta para mantener contraste). */
+    --excel-green:     #107c41;
+    --excel-wash:      #e6f4ea;
     --shadow-sm:       0 1px 2px rgba(0,25,50,0.07);
     --shadow-md:       0 6px 20px -6px rgba(0,25,50,0.18);
     --good:            #0ca30c;
@@ -64,6 +69,8 @@
       --brand-magenta:   #e066a3;
       --brand-green:     #86d13a;
       --accent-wash:     #152234;
+      --excel-green:     #21a366;
+      --excel-wash:      #122a1d;
       --shadow-sm:       0 1px 2px rgba(0,0,0,0.3);
       --shadow-md:       0 10px 28px -8px rgba(0,0,0,0.55);
       --good:            #26c92a;
@@ -101,6 +108,8 @@
     --brand-magenta:   #e066a3;
     --brand-green:     #86d13a;
     --accent-wash:     #152234;
+    --excel-green:     #21a366;
+    --excel-wash:      #122a1d;
     --shadow-sm:       0 1px 2px rgba(0,0,0,0.3);
     --shadow-md:       0 10px 28px -8px rgba(0,0,0,0.55);
     --good:            #26c92a;
@@ -215,16 +224,17 @@
   }
   .reset-btn:hover{background:var(--accent-wash);}
   /* Fase 69 — botón "Descargar Excel" de la card "Detalle de encuestas
-     pendientes". Mismo patrón de tokens que zonaBadge() (tinte + borde +
-     texto de marca), en vez de un relleno sólido, para no introducir una
-     combinación de contraste nueva sin probar en modo oscuro. */
+     pendientes". Fase 70: recoloreado con el verde oficial de Microsoft
+     Excel (--excel-green/--excel-wash) y con el ícono de documento propio
+     de la app, en vez del azul de marca genérico. */
   .btn-download{
-    display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12.5px; font-weight:700;
-    color:var(--brand-blue-ink); background:var(--accent-wash); border:1px solid var(--brand-blue);
+    display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:12.5px; font-weight:700;
+    color:var(--excel-green); background:var(--excel-wash); border:1px solid var(--excel-green);
     cursor:pointer; padding:8px 14px; border-radius:10px; white-space:nowrap;
   }
-  .btn-download:hover{background:color-mix(in srgb, var(--brand-blue) 16%, var(--accent-wash));}
+  .btn-download:hover{background:color-mix(in srgb, var(--excel-green) 16%, var(--excel-wash));}
   .btn-download:disabled{opacity:.5; cursor:not-allowed;}
+  .btn-download svg{flex:none; display:block;}
   .filter-count{margin-left:auto; font-size:12.5px; color:var(--text-secondary);}
   .filter-count b{color:var(--text-primary); font-variant-numeric:tabular-nums;}
 
@@ -676,7 +686,13 @@
           <h2>Detalle de encuestas pendientes</h2>
           <div class="card-sub">Ordena por columna &middot; <span id="pTableSubcount"></span></div>
         </div>
-        <button class="btn-download" id="pBtnDownloadXlsx" type="button">&#11015;&#65039; Descargar Excel</button>
+        <button class="btn-download" id="pBtnDownloadXlsx" type="button" aria-label="Descargar Excel">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="1" y="1" width="22" height="22" rx="4" fill="currentColor"/>
+            <path d="M7.1 6.4h2.62l2.08 3.52 2.08-3.52h2.62l-3.3 5.6 3.3 5.6h-2.62l-2.08-3.52-2.08 3.52H7.1l3.3-5.6-3.3-5.6z" fill="#fff"/>
+          </svg>
+          Excel
+        </button>
       </div>
       <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
         <table class="data-table" id="pendTable">
