@@ -495,6 +495,7 @@
   .an-k-v{font-family:var(--font-display); font-size:22px; font-weight:800; line-height:1.2; font-variant-numeric:tabular-nums;}
   .an-k-s{font-size:11.5px; color:var(--text-muted); min-height:14px;}
   .an-d{font-size:11px; font-weight:700; white-space:nowrap;}
+  .an-dr{font-weight:700; line-height:1.2; margin-top:1px;}
   .an-cause{border:1px solid var(--border); border-radius:12px; padding:10px 13px; background:var(--surface-2); margin-bottom:8px;}
   .an-cause-top{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;}
   .an-rank{flex:none; width:20px; height:20px; border-radius:6px; background:var(--brand-blue); color:#fff; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
@@ -512,10 +513,10 @@
   .an-conc-v{color:var(--text-secondary); font-size:12.5px; text-align:right;}
   .an-tscroll{overflow-x:auto; border:1px solid var(--border); border-radius:12px;}
   .an-t{width:100%; border-collapse:collapse; font-size:12.5px;}
-  .an-t th{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); text-align:left; padding:8px 10px; background:var(--surface-2); border-bottom:1px solid var(--border); white-space:nowrap;}
-  .an-t td{padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
-  .an-t .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
-  .an-t th.num{text-align:right;}
+  .an-t th{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); text-align:center; padding:8px 10px; background:var(--surface-2); border-bottom:1px solid var(--border); white-space:nowrap;}
+  .an-t td{padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:middle; text-align:center;}
+  .an-t .num{text-align:center; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .an-t th.num{text-align:center;}
   .an-t td i{color:var(--text-muted); font-style:normal; font-size:11px;}
   .an-tr{cursor:pointer;}
   .an-tr:hover td{background:var(--surface-sunken);}
@@ -4045,9 +4046,16 @@ function anHtml(){
     const pr = i>0 ? npsStats(months[i-1].rows) : null;
     const dd = pr ? anDelta(s.nps, pr.nps) : null;
     const dh = dd===null ? '' : `<span class="an-d" style="color:${dd>0?'var(--good)':dd<0?'var(--critical)':'var(--text-muted)'}">${dd>0?'&#9650;':dd<0?'&#9660;':'&#9644;'}${dd>0?'+':''}${dd}</span>`;
+    let rh = '';
+    if(pr){
+      const dn = s.n - pr.n;
+      const pc = pr.n>0 ? Math.round(dn/pr.n*100) : null;
+      const col = !x.m.is_closed ? 'var(--text-muted)' : dn>0?'var(--good)':dn<0?'var(--critical)':'var(--text-muted)';
+      rh = `<div class="an-d an-dr" style="color:${col}" title="vs ${escHtml(months[i-1].m.label)}: ${pr.n} &rarr; ${s.n} respuestas${x.m.is_closed?'':' (mes en curso: no comparable)'}">${dn>0?'&#9650;':dn<0?'&#9660;':'&#9644;'}${dn>0?'+':''}${dn} &middot; ${pc===null?'n/c':(pc>0?'+':'')+pc+'%'}${x.m.is_closed?'':'*'}</div>`;
+    }
     return `<tr class="an-tr${AN.period===x.m.key?' on':''}" data-an-period="${x.m.key}" tabindex="0">
       <td>${escHtml(x.m.label)}${x.m.is_closed?'':' <i>(parcial)</i>'}</td>
-      <td class="num">${s.n}</td>
+      <td class="num">${s.n}${rh}</td>
       <td class="num">${s.p}/${s.ne}/${s.d}</td>
       <td class="num" style="color:${anNpsColor(s.nps)};font-weight:800">${fmtPct(s.nps)} ${dh}</td>
       <td>${escHtml(anTopCauseLabel(x.rows))}</td></tr>`;
@@ -4056,7 +4064,7 @@ function anHtml(){
   const accRow = `<tr class="an-tr an-tr-acc${AN.period==='acc'?' on':''}" data-an-period="acc" tabindex="0">
       <td>Acumulado</td><td class="num">${sa.n}</td><td class="num">${sa.p}/${sa.ne}/${sa.d}</td>
       <td class="num" style="color:${anNpsColor(sa.nps)};font-weight:800">${fmtPct(sa.nps)}</td><td>${escHtml(anTopCauseLabel(all))}</td></tr>`;
-  const trend = `<div class="an-tscroll"><table class="an-t"><thead><tr><th>Mes</th><th class="num">Resp.</th><th class="num">Prom/Neu/Det</th><th class="num">NPS</th><th>Situación que más se repite</th></tr></thead><tbody>${trows}${accRow}</tbody></table></div>`;
+  const trend = `<div class="an-tscroll"><table class="an-t"><thead><tr><th>Mes</th><th class="num">Resp. <span style="font-weight:400">(vs mes ant.)</span></th><th class="num">Prom/Neu/Det</th><th class="num">NPS</th><th>Situación que más se repite</th></tr></thead><tbody>${trows}${accRow}</tbody></table></div>${months.some(x=>!x.m.is_closed)?'<p class="cm-note">Variación de respuestas = cantidad y % vs el mes anterior. * Mes en curso: aún no es comparable con un mes cerrado.</p>':'<p class="cm-note">Variación de respuestas = cantidad y % vs el mes anterior.</p>'}`;
 
   // concentración
   let conc = '';
