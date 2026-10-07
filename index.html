@@ -473,6 +473,10 @@
   .cm-act-d{font-size:12.5px; line-height:1.5; color:var(--text-secondary);}
   .cm-act-m{display:flex; gap:6px 18px; flex-wrap:wrap; margin-top:7px; font-size:11.5px; color:var(--text-muted);}
   .cm-act-m b{color:var(--text-secondary);}
+  .cm-act2{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; border:1px solid var(--border); border-radius:10px; padding:9px 12px; background:var(--surface-2); margin-bottom:6px;}
+  .cm-act2-d{font-size:13px; line-height:1.45; color:var(--text-primary); min-width:0;}
+  .cm-act2-p{flex:none; font-size:11px; font-weight:700; line-height:1; padding:5px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-secondary); white-space:nowrap;}
+  @media (max-width:520px){ .cm-act2{flex-direction:column; gap:6px;} }
   .cm-note{margin:4px 0 0; font-size:11.5px; line-height:1.5; color:var(--text-muted);}
   @media (max-width:640px){
     .cm-overlay{padding:0; align-items:flex-end;}
@@ -3519,131 +3523,86 @@ function cxDaysBetween(a,b){
 // tildes, minúsculas). Las causas sin `re` (touchpoints) solo se activan por nota baja.
 const CX_THEMES = {
   entrega_tiempos:{
-    label:'Demora o falta de fecha de entrega',
+    label:"Demora o falta de fecha de entrega",
     re:/demor|no me (han |la |lo )?entreg|aun no|todavia no|sin fecha|fecha de entrega|\bespera\b|\besperas\b|esperando|esperar\b|agiliz|retras|pague la totalidad|ya pagad|no tengo (el )?(auto|vehiculo)|\blent[oa]\b|larguisim/,
-    recover:{t:'Entregar fecha comprometida y un responsable único', who:'Jefatura de sucursal', when:'Hoy (≤ 24 h)',
-      d:'Llamar al cliente el mismo día para informar el estado exacto de su vehículo: qué falta, quién lo gestiona y fecha de entrega con día y hora. Confirmarlo por WhatsApp y actualizar cada 48 h hasta la entrega. Si la espera supera lo prometido, evaluar una compensación según política comercial (p. ej., vehículo de cortesía o combustible).'},
-    fix:{t:'Reconstruir la línea de tiempo del caso y destrabar la etapa detenida', who:'Jefatura de sucursal + Administración', when:'≤ 48 h',
-      d:'Mapear venta → pago → documentos → preparación → entrega con fechas reales e identificar en qué etapa se frenó y por qué (permiso de circulación, revisión técnica, reparación, traslado). Escalar el bloqueo al área responsable con fecha límite.'},
-    prevent:{t:'SLA por etapa y tablero de ventas facturadas sin entregar', who:'Gerencia Usados / Jefaturas', when:'Implementar en 30 días',
-      d:'Definir tiempos máximos por etapa (ej.: entrega agendada en ≤ 72 h desde pago y documentos completos) y revisar a diario un listado de ventas sin entregar con sus días de espera, con alerta al jefe de sucursal al tercer día. Enviar al cliente un aviso en cada hito: pago confirmado, documentos al día, vehículo en preparación y entrega agendada.'}
+    jef:[["Llamar hoy con el estado exacto del vehículo y una fecha de entrega comprometida; confirmar por WhatsApp y actualizar cada 48 h.", "Hoy"], ["Identificar la etapa detenida (pago, documentos, preparación, traslado) y escalar el bloqueo con fecha límite.", "≤ 48 h"]],
+    ven:[["Informar al cliente cada hito hasta la entrega y no comprometer fechas sin validarlas con la jefatura.", "Hasta la entrega"]]
   },
   estado_vehiculo:{
-    label:'Vehículo entregado sucio, incompleto o con detalles no informados',
+    label:"Vehículo entregado sucio, incompleto o con detalles no informados",
     re:/sucio|limpi|lavad|faltant|extintor|\bkit\b|pisos? de goma|padron|manual|libro de mantenc|hongo|bencina|combustible|habitaculo|tapiz|prolij|sin llave|detalles? que no/,
-    recover:{t:'Reponer lo faltante y reparar la mala entrega', who:'Jefatura de sucursal', when:'≤ 48 h',
-      d:'Contactar al cliente para reconocer la falla de entrega, coordinar sin costo la reposición de lo que faltó (limpieza/detailing, combustible, kit de seguridad, manuales, padrón, accesorios prometidos) y confirmar por escrito cuándo quedará resuelto.'},
-    fix:{t:'Auditar cómo salió el vehículo desde {suc}', who:'Jefatura de sucursal', when:'≤ 3 días',
-      d:'Revisar con el equipo de preparación qué paso del proceso se omitió y quién firmó la pre-entrega. Si el vehículo llegó desde otra sucursal, validar su estado a la llegada y antes de comprometer fecha con el cliente.'},
-    prevent:{t:'Checklist de pre-entrega firmado y foto de "listo para entrega"', who:'Jefatura de sucursal / Preparación', when:'Implementar en 30 días',
-      d:'Estandarizar un checklist (limpieza interior y exterior, combustible mínimo, extintor/triángulo/botiquín, manual y libro de mantenciones, llaves, padrón y documentos, accesorios prometidos) firmado por preparador y vendedor, con foto subida al sistema. La entrega no se agenda sin checklist completo; auditar 5 entregas por semana por muestreo.'}
+    jef:[["Coordinar sin costo la reposición de lo faltante (limpieza, combustible, kit de seguridad, manuales, accesorios) y confirmarlo al cliente por escrito.", "≤ 48 h"], ["Identificar quién firmó la pre-entrega y qué paso se omitió; corregirlo con el equipo de {suc}.", "≤ 3 días"]],
+    ven:[["Revisar el vehículo con el checklist de pre-entrega antes de cada entrega; no entregar si está incompleto.", "Cada entrega"]]
   },
   falla_mecanica:{
-    label:'Falla mecánica o defecto del vehículo',
+    label:"Falla mecánica o defecto del vehículo",
     re:/falla|defectuos|\bmotor\b|choque|chocad|no parte|no enciende|revision tecnica|desperfect|sunroof|ruidos? (raro|extran|en el|del)|reparacion|arreglo|danos|mal estado|vibra/,
-    recover:{t:'Derivar a postventa/garantía con prioridad y un único contacto', who:'Postventa + Jefatura de sucursal', when:'≤ 48 h',
-      d:'Agendar el diagnóstico dentro de 48 h, asignar a una persona que informe avances cada 48 h hasta cerrar el caso y evaluar un vehículo de reemplazo o cortesía mientras dure la reparación. Dejar el compromiso por escrito al cliente.'},
-    fix:{t:'Determinar dónde falló el control de calidad del vehículo', who:'Jefatura de sucursal + Reacondicionamiento', when:'≤ 5 días',
-      d:'Contrastar el informe de inspección previo a la venta con el defecto reportado: ¿se detectó y no se informó, o no se detectó? Si el origen está en el proveedor o en la preparación, informarlo a Reacondicionamiento/Compras.'},
-    prevent:{t:'Inspección multipunto con informe visible y prueba de ruta antes de la entrega', who:'Gerencia Usados', when:'Implementar en 45 días',
-      d:'Exigir inspección técnica documentada y prueba de arranque/ruta antes de cada entrega, y mostrar al cliente el informe (estado, historial y detalles conocidos) antes de firmar. Revisar mensualmente qué origen de vehículos concentra fallas post-venta.'}
+    jef:[["Agendar el diagnóstico con postventa y asignar un contacto único que informe cada 48 h; evaluar vehículo de cortesía.", "≤ 48 h"], ["Contrastar la inspección previa con el defecto reportado; si falló el control, avisar a Reacondicionamiento.", "≤ 5 días"]],
+    ven:[["Mantener contacto con el cliente hasta cerrar el caso e informar antes de la venta todo detalle conocido del vehículo.", "Hasta el cierre"]]
   },
   info_promesas:{
-    label:'Información incompleta o compromisos no cumplidos',
+    label:"Información incompleta o compromisos no cumplidos",
     re:/no se cumpli|prometi|compromet|me asegur|aseguraron|no fue informad|no me dijeron|no me avisa|no me indicar|ocult|mintier|engan|falta de informacion|falto informacion|poca informacion|sin informacion|no se informo|no me informaron|no informo|poca explicacion|falta de claridad|sinceros|no ofrecer/,
-    recover:{t:'Reconocer lo prometido, validar con la carpeta de venta y corregir', who:'Jefatura de sucursal', when:'≤ 48 h',
-      d:'Revisar con el vendedor y los documentos qué se acordó realmente (precio, gastos, accesorios, reparaciones, plazos) y responder al cliente por escrito: cumplir el compromiso, corregir el cobro o explicar con respaldo. Escuchar al cliente antes de defender la versión interna.'},
-    fix:{t:'Feedback 1:1 a {vend} sobre manejo de expectativas', who:'Jefatura de sucursal', when:'≤ 1 semana',
-      d:'Usar este caso para trabajar la regla "no prometer lo que no controlo": todo lo que se ofrece verbalmente (accesorios, reparaciones, fechas, costos) se registra y se valida antes de comunicarlo al cliente.'},
-    prevent:{t:'Hoja de compromisos de la venta firmada por el cliente', who:'Gerencia Usados / Jefaturas', when:'Implementar en 30 días',
-      d:'Estandarizar un resumen de una página con precio final, gastos y trámites, accesorios o reparaciones prometidos, plazos y estado conocido del vehículo. El vendedor lo lee junto al cliente antes de la firma y entrega copia; su revisión se incluye en el control de calidad semanal de la jefatura.'}
+    jef:[["Revisar la carpeta de venta y responder al cliente por escrito: cumplir lo acordado, corregir el cobro o explicar con respaldo.", "≤ 48 h"], ["Feedback 1:1 a {vend} sobre manejo de expectativas: no prometer lo que no se controla.", "≤ 1 semana"]],
+    ven:[["Registrar todo lo ofrecido (accesorios, reparaciones, plazos, costos) y validarlo con la jefatura antes de comunicarlo.", "Cada venta"]]
   },
   tramites_costos:{
-    label:'Trámites, documentos, financiamiento o costos',
+    label:"Trámites, documentos, financiamiento o costos",
     re:/credito|financ|documento|factura|permiso de circulacion|transferencia|tramit|trabas|\btag\b|gastos|costos|\bcobr(o|os|aron|an|ar)\b|\bseguros? (automotriz|de|del|sin)|un seguro/,
-    recover:{t:'Resolver el trámite pendiente y explicar los costos con respaldo', who:'Ejecutivo de financiamiento / Administración', when:'≤ 48 h',
-      d:'Contactar al cliente con el estado del trámite que lo afectó (crédito, factura, permiso de circulación, transferencia, TAG) y, si hubo un cobro distinto al informado, aclararlo y corregirlo con documento. Entregar fecha de cierre y un ejecutivo de contacto.'},
-    fix:{t:'Revisar dónde se trabó el flujo documental del caso', who:'Jefatura de sucursal + Administración', when:'≤ 5 días',
-      d:'Con Administración y Financiamiento, identificar la etapa que generó la espera o el error (aprobación del crédito, facturación, pago del permiso, transferencia) y quién tenía la responsabilidad en ese momento.'},
-    prevent:{t:'Lista de costos y trámites entregada antes del pago', who:'Gerencia Usados / Administración', when:'Implementar en 45 días',
-      d:'Entregar al cliente, antes de reservar o pagar, el detalle de todos los costos y trámites (permiso de circulación, transferencia, TAG, seguros, gastos operacionales) indicando quién los paga y cuándo. Asignar un ejecutivo de trámites que informe estado por WhatsApp y medir el tiempo de ciclo documental, gestionando todo caso que exceda la meta.'}
+    jef:[["Contactar al cliente con el estado del trámite, aclarar cualquier cobro distinto al informado y fijar fecha de cierre.", "≤ 48 h"], ["Identificar la etapa que se trabó (crédito, facturación, permiso, transferencia) y escalarla con Administración.", "≤ 5 días"]],
+    ven:[["Informar todos los costos y trámites antes de la reserva y enviar avances por WhatsApp.", "Cada venta"]]
   },
   traspaso:{
-    label:'Falta de coordinación entre sucursales o traslados',
+    label:"Falta de coordinación entre sucursales o traslados",
     re:/otra sucursal|entre las automotora|entre sucursales|traslado|grua|llega de otra|retire el vehiculo en otra|seguimiento de informacion|comunicacion entre/,
-    recover:{t:'Informar quién lo atenderá en la entrega y cuándo', who:'Jefatura de sucursal', when:'≤ 24 h',
-      d:'Contactar al cliente con un responsable único y la fecha y lugar de entrega confirmados. Si el vehículo viene de otra sucursal, verificar su estado antes de comprometer horario.'},
-    fix:{t:'Reconstruir los traspasos del caso entre sucursales', who:'Jefaturas involucradas', when:'≤ 5 días',
-      d:'Identificar quién tenía al cliente en cada paso (venta, preparación, traslado, entrega) y dónde se perdieron la información o el compromiso.'},
-    prevent:{t:'"Dueño del cliente" desde la venta hasta la entrega', who:'Gerencia Usados', when:'Implementar en 45 días',
-      d:'Asignar un responsable único que acompañe al cliente aunque el vehículo esté en otra sucursal, con una ficha de traspaso (compromisos, fecha de entrega, estado del vehículo) y aviso al cliente de quién lo recibirá. Medir tiempos y calidad de los traslados entre sucursales.'}
+    jef:[["Confirmar al cliente quién lo atenderá y la fecha y lugar de entrega; verificar el estado del vehículo si viene de otra sucursal.", "≤ 24 h"], ["Definir un único responsable del cliente desde la venta hasta la entrega.", "≤ 5 días"]],
+    ven:[["Seguir como contacto del cliente hasta la entrega, aunque el vehículo esté en otra sucursal.", "Hasta la entrega"]]
   },
-  // --- Causas que se activan por nota baja en un punto de contacto (≤ 3) ---
   atencion:{
-    label:'Trato o atención del equipo comercial',
+    label:"Trato o atención del equipo comercial",
     re:/poca disposicion|poca respuesta|poca preocupacion|olvidad|\btacto\b|mal trato|mala atencion|dejo mucho que desear|soberb|desinteres|reactivo|poco formal/,
-    recover:{t:'Disculpa personal y escucha activa del cliente', who:'Jefatura de sucursal', when:'≤ 48 h',
-      d:'Que la jefatura (no el vendedor involucrado) llame al cliente, escuche sin interrumpir, valide su experiencia y le deje un contacto directo para lo que quede pendiente.'},
-    fix:{t:'Feedback 1:1 y acompañamiento en sala a {vend}', who:'Jefatura de sucursal', when:'≤ 2 semanas',
-      d:'Revisar el caso con evidencia (comentario y notas del cliente), acordar 2 conductas observables (p. ej., explicar cada etapa del proceso y confirmar próximos pasos al cierre de cada visita) y hacer shadowing en 2 atenciones durante las próximas 2 semanas.'},
-    prevent:{t:'Ritual semanal de calidad de atención y reconocimiento', who:'Jefatura de sucursal', when:'Recurrente (semanal)',
-      d:'Incluir en la reunión semanal de ventas los comentarios de clientes (positivos y negativos) y el NPS individual; practicar con role-play escucha activa, manejo de expectativas y cierre; reconocer públicamente a quienes reciben menciones positivas.'}
+    jef:[["Llamar personalmente al cliente: disculpa, escucha activa y contacto directo para lo pendiente.", "≤ 48 h"], ["Feedback 1:1 a {vend}: acordar 2 conductas observables y acompañarlo en 2 atenciones.", "≤ 2 semanas"]],
+    ven:[["Explicar cada etapa del proceso y confirmar los próximos pasos al cierre de cada visita.", "Desde hoy"]]
   },
   acogida:{
-    label:'Acogida en sala',
-    fix:{t:'Revisar el protocolo de recepción en {suc}', who:'Jefatura de sucursal', when:'≤ 1 semana',
-      d:'Observar una jornada de sala midiendo tiempos de espera y la forma de recibir al cliente; reforzar saludo en menos de 1 minuto, identificación de la necesidad y asignación de vendedor sin esperas.'},
-    prevent:{t:'Estándar de recepción medido con cliente incógnito', who:'Experiencia Clientes', when:'Mensual',
-      d:'Definir un estándar de recepción (saludo ≤ 1 min, ofrecer asiento y café, presentar al vendedor asignado) y medirlo con una visita de cliente incógnito al mes por sucursal.'}
+    label:"Acogida en sala",
+    jef:[["Observar una jornada de sala en {suc}: saludo en menos de 1 minuto y vendedor asignado sin esperas.", "≤ 1 semana"]],
+    ven:[["Saludar al cliente en menos de 1 minuto, identificar su necesidad y presentarse.", "Cada visita"]]
   },
   claridad:{
-    label:'Claridad de precios',
-    fix:{t:'Contrastar la cotización con el cobro final', who:'Jefatura de sucursal', when:'≤ 3 días',
-      d:'Revisar la cotización entregada al cliente e identificar qué concepto no quedó claro (descuentos, bonos, gastos operacionales, permiso, seguros) y por qué.'},
-    prevent:{t:'Cotización de precio final por escrito antes de reservar', who:'Gerencia Usados', when:'Implementar en 30 días',
-      d:'Entregar un desglose de una página: precio lista, descuentos o bonos, gastos operacionales, permiso de circulación, transferencia y total a pagar; explicarlo en voz alta al cliente y hacerlo firmar antes de la reserva.'}
+    label:"Claridad de precios",
+    jef:[["Contrastar la cotización con el cobro final e identificar qué concepto no quedó claro.", "≤ 3 días"]],
+    ven:[["Entregar el precio final desglosado por escrito y explicarlo antes de la reserva.", "Cada venta"]]
   },
   comunicacion:{
-    label:'Comunicación con el cliente',
-    fix:{t:'Revisar cómo se comunicó el equipo con el cliente', who:'Jefatura de sucursal', when:'≤ 3 días',
-      d:'Revisar mensajes y llamadas del caso: tiempos de respuesta, canal utilizado y si se informó cada hito del proceso.'},
-    prevent:{t:'Canal, frecuencia y hitos de comunicación acordados al cerrar la venta', who:'Jefatura de sucursal', when:'Implementar en 30 días',
-      d:'Acordar con el cliente su canal preferido (WhatsApp o llamada) y la frecuencia de contacto; enviar mensajes de hito y responder consultas en un máximo de 4 horas hábiles.'}
+    label:"Comunicación con el cliente",
+    jef:[["Revisar los mensajes y llamadas del caso: tiempos de respuesta e hitos informados.", "≤ 3 días"]],
+    ven:[["Acordar canal y frecuencia de contacto al cerrar la venta y responder en máximo 4 horas hábiles.", "Cada venta"]]
   },
   fluidez:{
-    label:'Fluidez del proceso de compra',
-    fix:{t:'Mapear las trabas del proceso de compra de este caso', who:'Jefatura de sucursal', when:'≤ 1 semana',
-      d:'Con el cliente y el equipo, identificar cuánto tardó cada etapa y qué trámite o pasaje generó fricción (reserva, crédito, documentos, pago).'},
-    prevent:{t:'Mapa del proceso con tiempos objetivo por etapa', who:'Gerencia Usados', when:'Implementar en 45 días',
-      d:'Definir y publicar el recorrido de compra con tiempo objetivo y responsable por etapa, medir el tiempo de ciclo venta→entrega por sucursal y revisar cada mes las 3 principales causas de demora.'}
+    label:"Fluidez del proceso de compra",
+    jef:[["Mapear los tiempos por etapa del caso e identificar la traba (reserva, crédito, documentos o pago).", "≤ 1 semana"]],
+    ven:[["Avisar al cliente cada etapa y su plazo, y escalar a la jefatura cualquier demora.", "Cada venta"]]
   },
   parte_pago:{
-    label:'Vehículo recibido en parte de pago',
-    fix:{t:'Revisar la tasación del vehículo en parte de pago', who:'Jefatura de sucursal', when:'≤ 3 días',
-      d:'Verificar los criterios y comparables usados y el tiempo de respuesta, y contrastarlos con lo que se informó al cliente.'},
-    prevent:{t:'Tasación transparente con respuesta en 24 h', who:'Gerencia Usados', when:'Implementar en 30 días',
-      d:'Explicar al cliente los criterios de tasación mostrando comparables, entregar el valor final por escrito en un máximo de 24 h hábiles y registrar los casos en que el cliente no queda conforme.'}
+    label:"Vehículo recibido en parte de pago",
+    jef:[["Revisar criterios y comparables de la tasación y contrastarlos con lo informado al cliente.", "≤ 3 días"]],
+    ven:[["Explicar los criterios de tasación y entregar el valor final por escrito en máximo 24 h hábiles.", "Cada tasación"]]
   },
   entrega:{
-    label:'Proceso de entrega',
-    fix:{t:'Revisar cómo se realizó la entrega', who:'Jefatura de sucursal', when:'≤ 3 días',
-      d:'Contrastar fecha comprometida vs. real, quién entregó, cuánto duró y qué se explicó al cliente; identificar qué faltó en ese momento clave.'},
-    prevent:{t:'Entrega agendada, preparada y acompañada', who:'Jefatura de sucursal', when:'Implementar en 30 días',
-      d:'Confirmar fecha y hora con el cliente 24 h antes, explicar las funciones del vehículo (15 min), entregar con checklist y con presencia de la jefatura, y llamar a las 48 h para verificar que todo esté en orden.'}
+    label:"Proceso de entrega",
+    jef:[["Contrastar la fecha comprometida con la real y qué se explicó al cliente en la entrega.", "≤ 3 días"]],
+    ven:[["Confirmar fecha y hora 24 h antes, explicar el vehículo (15 min) y llamar al cliente a las 48 h.", "Cada entrega"]]
   },
   general_detractor:{
-    label:'Sin causa clara en notas ni comentarios',
-    fix:{t:'Descubrir la causa de la nota directamente con el cliente', who:'Jefatura de sucursal', when:'≤ 48 h',
-      d:'El cliente calificó bajo, pero sin comentario ni notas bajas por etapa que expliquen el motivo. La llamada de recuperación debe partir preguntando qué experiencia lo llevó a esa nota y registrar la respuesta como nueva causa.'},
-    prevent:{t:'Pregunta de cierre obligatoria en la entrega', who:'Experiencia Clientes', when:'Implementar en 30 días',
-      d:'Incorporar al cierre de cada entrega la pregunta "¿hay algo que podamos mejorar para que nos califique con un 9 o 10?" y registrar la respuesta, para detectar insatisfacción antes de la encuesta.'}
+    label:"Sin causa clara en notas ni comentarios",
+    jef:[["Preguntar en la llamada qué experiencia llevó a esa nota y registrar la causa en el CRM.", "≤ 48 h"]],
+    ven:[["Cerrar cada entrega preguntando qué mejoraría para un 9 o 10 y registrar la respuesta.", "Cada entrega"]]
   },
   general_neutro:{
-    label:'Experiencia correcta pero sin entusiasmo',
-    fix:{t:'Identificar la brecha entre un 7–8 y un 9–10', who:'Vendedor + jefatura', when:'≤ 5 días hábiles',
-      d:'Las notas por etapa no muestran una falla puntual: la conversación debe explorar qué faltó para sorprender al cliente (rapidez, personalización, seguimiento) y registrar la respuesta.'},
-    prevent:{t:'Gesto de diferenciación en la entrega', who:'Jefatura de sucursal', when:'Implementar en 30 días',
-      d:'Sumar a la entrega un detalle memorable y barato (explicación personalizada del vehículo, llamada de seguimiento a las 48 h, mensaje de bienvenida firmado por la jefatura) para pasar de una experiencia "correcta" a una recomendable.'}
+    label:"Experiencia correcta pero sin entusiasmo",
+    jef:[["Sumar un gesto de diferenciación a la entrega: explicación personalizada y llamada de seguimiento a las 48 h.", "Cada entrega"]],
+    ven:[["Preguntar al cliente qué faltó para un 9–10 y registrar la respuesta.", "≤ 5 días hábiles"]]
   }
 };
 const CX_TEXT_THEMES = ['entrega_tiempos','estado_vehiculo','falla_mecanica','info_promesas','tramites_costos','traspaso','atencion'];
@@ -3694,48 +3653,37 @@ function cxBuildActions(r){
   const ctx = { vend: r.vendedor ? cxTitleCase(r.vendedor) : 'el vendedor', suc: r.sucursal };
   const themes = detected.map(d=>({...d, th: CX_THEMES[d.id], rec: cxRecurrence(r, d.id)}));
   const main = (themes.find(t=>t.why.includes('Comentario del cliente')) || themes[0]).th;
-  const A = [], B = [], C = [];
   const isDet = r.cat==='Detractor';
+  const J = [], V = [];
 
+  // Jefatura: primero la llamada al cliente, luego lo específico de cada causa
   if(isDet){
-    A.push({t:'Llamada de recuperación (no solo un mensaje)', who:'Jefatura de sucursal', when:'≤ 48 h hábiles',
-      d:`Llamar al cliente con la jefatura de ${escHtml(ctx.suc)} (no el vendedor involucrado): agradecer que respondiera, reconocer de forma específica lo ocurrido (${escHtml(main.label.toLowerCase())}) sin justificarse, acordar una solución con fecha y cerrar con un resumen por WhatsApp o correo. Registrar el resultado del contacto en el CRM.`});
+    J.push({d:`Llamar al cliente (jefatura, no el vendedor): reconocer el problema sin justificarse, acordar solución con fecha y confirmarla por WhatsApp.`, when:'≤ 48 h hábiles'});
+    V.push({d:'Entregar a la jefatura todo lo conversado y prometido al cliente; no contactarlo sobre el reclamo hasta coordinar con ella.', when:'≤ 24 h'});
   } else {
-    A.push({t:'Contacto de agradecimiento y exploración', who:'Vendedor + jefatura', when:'≤ 5 días hábiles',
-      d:'Llamada breve para agradecer la nota, preguntar qué habría llevado la experiencia a un 9–10 y resolver lo puntual que mencionó. Los neutros no reclaman, pero tampoco recomiendan: son el segmento más fácil de convertir en promotores.'});
+    V.push({d:'Llamar al cliente: agradecer la nota, preguntar qué faltó para un 9–10 y resolver lo puntual que mencionó.', when:'≤ 5 días hábiles'});
+    J.push({d:'Revisar la respuesta del cliente y definir con el vendedor una mejora concreta para el próximo caso similar.', when:'≤ 5 días hábiles'});
   }
-  themes.forEach(t=>{ if(t.th.recover && A.length<4) A.push(t.th.recover); });
+  themes.slice(0,2).forEach(t=>{ if(t.th.jef[0]) J.push({d:t.th.jef[0][0], when:t.th.jef[0][1]}); });
+  if(isDet) J.push({d:'Volver a contactar al cliente para confirmar que la solución se cumplió; si no hay conformidad, escalar al zonal.', when:'7 días después'});
   if(r.recompra && r.recompra!=='Sí'){
-    A.push({t:'Proteger la recompra y la recomendación', who:'Experiencia Clientes', when:'Seguimiento a 30 días',
-      d:`Ante la pregunta de si volvería a comprar, el cliente respondió "${escHtml(r.recompra)}". Una vez resuelto el problema, agendar un contacto de bienestar a los 30 días y evaluar un gesto de cortesía según política vigente (p. ej., revisión de cortesía o lavado) para recuperar confianza.`});
+    J.push({d:`El cliente respondió "${escHtml(r.recompra)}" a volver a comprar: una vez resuelto el caso, contacto de bienestar y gesto de cortesía según política.`, when:'A los 30 días'});
   }
-  if(isDet){
-    A.push({t:'Cerrar el ciclo con el cliente', who:'Jefatura / Experiencia Clientes', when:'7 días después',
-      d:'Volver a contactarlo para confirmar que la solución se cumplió y preguntar si cambió su percepción. Si queda conforme, invitarlo a compartir su experiencia o a recomendar; si no, escalar a la zonal.'});
-  }
-
-  themes.forEach(t=>{ if(t.th.fix) B.push(t.th.fix); });
-  const atOk = r.atencion!=null && r.atencion>=4 && r.vendedor && !themes.some(t=>t.id==='atencion');
-  if(atOk){
-    B.push({t:'Reconocer lo que sí funcionó con {vend}', who:'Jefatura de sucursal', when:'≤ 1 semana',
-      d:`El cliente evaluó bien la atención del vendedor (${r.atencion}/5): reforzar esa conducta y separar el problema de proceso de la persona al dar feedback, para que el equipo no lo viva como un castigo.`});
-  }
-
-  themes.forEach(t=>{ if(t.th.prevent) C.push(t.th.prevent); });
   const maxRec = Math.max(...themes.map(t=>t.rec));
   if(maxRec>=2){
     const worst = themes.find(t=>t.rec===maxRec);
-    C.push({t:'Plan de acción de sucursal por reincidencia', who:'Jefatura + Zonal', when:'≤ 2 semanas',
-      d:`"${escHtml(worst.th.label)}" ya aparece en ${maxRec} casos más de ${escHtml(ctx.suc)}. Dejar de tratarlo como un caso aislado: abrir un plan con responsable y fecha, y revisar su avance en el comité de sucursal hasta que deje de repetirse.`});
+    J.push({d:`"${escHtml(worst.th.label)}" ya suma ${maxRec} casos más en ${escHtml(ctx.suc)}: abrir plan de acción con responsable y fecha y revisarlo en el comité semanal.`, when:'≤ 2 semanas'});
   }
-  C.push({t:'Revisar el caso en el comité semanal de experiencia', who:'Jefatura + Experiencia Clientes', when:'Próxima reunión semanal',
-    d:'Presentar el caso con su causa raíz y las acciones comprometidas, asignar responsable y fecha a cada una, y verificar su cumplimiento la semana siguiente. Registrar la causa en la bitácora para detectar patrones por sucursal y vendedor.'});
+  themes.forEach(t=>{ if(t.th.jef[1]) J.push({d:t.th.jef[1][0], when:t.th.jef[1][1]}); });
 
-  return { themes, groups:[
-    {key:'recover', title:'Recuperar al cliente', sub:'Qué hacer ahora con esta persona', items:A},
-    {key:'fix', title:'Corregir en origen', sub:'Qué revisar en la sucursal y con el equipo', items:B},
-    {key:'prevent', title:'Evitar que se repita', sub:'Cambios de proceso para el futuro', items:C}
-  ], ctx };
+  // Vendedor: conductas por causa
+  themes.forEach(t=>{ t.th.ven.forEach(a=>V.push({d:a[0], when:a[1]})); });
+
+  const uniq = (L,n)=>{ const seen = new Set(); return L.filter(x=>!seen.has(x.d) && seen.add(x.d)).slice(0,n); };
+  return { themes, ctx, groups:[
+    {key:'jef', title:'Jefatura de sucursal', sub:'Acciones a ejecutar', items:uniq(J,5)},
+    {key:'ven', title:'Vendedor', sub:r.vendedor ? ctx.vend : 'Responsable de la venta', items:uniq(V,3)}
+  ]};
 }
 
 function cxTpBar(label, v){
@@ -3778,11 +3726,10 @@ function cxCaseHtml(r){
 
   const groups = isProm ? '' : act.groups.map(g=>`
     <div class="cm-grp">
-      <div class="cm-grp-h"><span class="cm-grp-t">${g.title}</span><span class="cm-grp-s">${g.sub}</span></div>
-      ${g.items.map(a=>`<div class="cm-act">
-        <div class="cm-act-t">${cxFill(a.t, act.ctx)}</div>
-        <div class="cm-act-d">${cxFill(a.d, act.ctx)}</div>
-        <div class="cm-act-m"><span><b>Responsable:</b> ${escHtml(a.who)}</span><span><b>Plazo:</b> ${escHtml(a.when)}</span></div>
+      <div class="cm-grp-h"><span class="cm-grp-t">${escHtml(g.title)}</span><span class="cm-grp-s">${escHtml(g.sub)}</span></div>
+      ${g.items.map(a=>`<div class="cm-act2">
+        <div class="cm-act2-d">${cxFill(a.d, act.ctx)}</div>
+        <span class="cm-act2-p">${escHtml(a.when)}</span>
       </div>`).join('')}
     </div>`).join('');
 
@@ -3820,9 +3767,9 @@ function cxCaseHtml(r){
       <div class="cm-causes">${causes}</div>
     </section>
     <section>
-      <h4 class="cm-h">Acciones sugeridas <span class="cm-h-s">para que no se repita</span></h4>
+      <h4 class="cm-h">Acciones sugeridas <span class="cm-h-s">quién hace qué y cuándo</span></h4>
       ${groups}
-      <p class="cm-note">Sugerencias generadas automáticamente a partir de las notas y comentarios de este caso y del historial de la sucursal. Validar y ajustar con la jefatura antes de comprometerlas con el cliente.</p>
+      <p class="cm-note">Sugerencias automáticas según las notas, comentarios e historial de la sucursal. Validar con la jefatura antes de comprometerlas con el cliente.</p>
     </section>`}`;
   return { head, body };
 }
