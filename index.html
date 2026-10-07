@@ -477,6 +477,51 @@
   .cm-act2-d{font-size:13px; line-height:1.45; color:var(--text-primary); min-width:0;}
   .cm-act2-p{flex:none; font-size:11px; font-weight:700; line-height:1; padding:5px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-secondary); white-space:nowrap;}
   @media (max-width:520px){ .cm-act2{flex-direction:column; gap:6px;} }
+  /* Fase 79 — pop up de análisis por zona / sucursal */
+  .zona-row.clickable{cursor:pointer; border-radius:12px; padding:8px 10px; margin:-8px -10px; transition:background .12s ease;}
+  .zona-row.clickable:hover{background:var(--surface-sunken);}
+  .zona-row.clickable:focus-visible, tr.clickable-row:focus-visible{outline:2px solid var(--brand-blue); outline-offset:2px;}
+  tr.clickable-row{cursor:pointer;}
+  tr.clickable-row:hover td{background:var(--surface-sunken);}
+  .an-chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .an-chip{font:inherit; font-size:12px; font-weight:700; padding:6px 11px; border-radius:999px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-secondary); cursor:pointer;}
+  .an-chip:hover{background:var(--surface-sunken);}
+  .an-chip.on{background:var(--brand-blue); border-color:var(--brand-blue); color:#fff;}
+  .an-chip-acc{margin-left:auto;}
+  .an-chip:focus-visible{outline:2px solid var(--brand-blue); outline-offset:2px;}
+  .an-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:8px;}
+  .an-k{border:1px solid var(--border); border-radius:12px; padding:9px 12px; background:var(--surface-2);}
+  .an-k-l{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);}
+  .an-k-v{font-family:var(--font-display); font-size:22px; font-weight:800; line-height:1.2; font-variant-numeric:tabular-nums;}
+  .an-k-s{font-size:11.5px; color:var(--text-muted); min-height:14px;}
+  .an-d{font-size:11px; font-weight:700; white-space:nowrap;}
+  .an-cause{border:1px solid var(--border); border-radius:12px; padding:10px 13px; background:var(--surface-2); margin-bottom:8px;}
+  .an-cause-top{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;}
+  .an-rank{flex:none; width:20px; height:20px; border-radius:6px; background:var(--brand-blue); color:#fff; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center;}
+  .an-cause-n{font-size:13.5px; font-weight:700; flex:1; min-width:140px;}
+  .an-cause-c{font-size:12px; font-weight:800; color:var(--critical); white-space:nowrap;}
+  .an-bar{height:6px; border-radius:999px; background:var(--surface-sunken); margin:7px 0 6px; overflow:hidden;}
+  .an-bar i{display:block; height:100%; border-radius:999px; background:var(--critical);}
+  .an-rec{display:inline-block; font-size:11.5px; font-weight:600; color:var(--text-muted); margin-bottom:2px;}
+  .an-q{font-size:12.5px; line-height:1.45; color:var(--text-secondary); border-left:2px solid var(--border-strong); padding-left:9px; margin-top:6px;}
+  .an-q-m{font-size:11px; color:var(--text-muted); white-space:normal;}
+  .an-nocause{font-size:12px; color:var(--text-muted);}
+  .an-conc{display:flex; flex-direction:column; gap:5px;}
+  .an-conc-r{display:flex; justify-content:space-between; gap:12px; border:1px solid var(--border); border-radius:10px; padding:7px 12px; background:var(--surface-2); font-size:13px;}
+  .an-conc-n{font-weight:700; min-width:0; overflow-wrap:anywhere;}
+  .an-conc-v{color:var(--text-secondary); font-size:12.5px; text-align:right;}
+  .an-tscroll{overflow-x:auto; border:1px solid var(--border); border-radius:12px;}
+  .an-t{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .an-t th{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); text-align:left; padding:8px 10px; background:var(--surface-2); border-bottom:1px solid var(--border); white-space:nowrap;}
+  .an-t td{padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+  .an-t .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .an-t th.num{text-align:right;}
+  .an-t td i{color:var(--text-muted); font-style:normal; font-size:11px;}
+  .an-tr{cursor:pointer;}
+  .an-tr:hover td{background:var(--surface-sunken);}
+  .an-tr.on td{background:var(--surface-sunken); font-weight:600; box-shadow:inset 0 0 0 0 transparent;}
+  .an-tr-acc td{border-top:2px solid var(--border-strong); font-weight:700;}
+  .an-tr:last-child td{border-bottom:0;}
   .cm-note{margin:4px 0 0; font-size:11.5px; line-height:1.5; color:var(--text-muted);}
   @media (max-width:640px){
     .cm-overlay{padding:0; align-items:flex-end;}
@@ -602,7 +647,7 @@
     <div class="card-head">
       <div>
         <h2>NPS por zona</h2>
-        <div class="card-sub">Composición de respuestas y NPS resultante por zona geográfica</div>
+        <div class="card-sub">Composición de respuestas y NPS resultante por zona geográfica &middot; presiona una zona para ver el análisis de comentarios y las acciones sugeridas</div>
       </div>
     </div>
     <div class="zona-rows" id="zonaRows"></div>
@@ -643,7 +688,7 @@
 
   <div class="card" style="margin-bottom:14px;">
     <h2>Ranking de sucursales</h2>
-    <div class="card-sub">Ordena por columna &middot; <span id="tableSubcount"></span> &middot; &ldquo;Promotores necesarios&rdquo; = nuevas encuestas Promotor a sumar para llegar a NPS 80%, manteniendo los Detractores actuales</div>
+    <div class="card-sub">Ordena por columna &middot; presiona una sucursal para ver su análisis &middot; <span id="tableSubcount"></span> &middot; &ldquo;Promotores necesarios&rdquo; = nuevas encuestas Promotor a sumar para llegar a NPS 80%, manteniendo los Detractores actuales</div>
     <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
       <table class="data-table" id="sucTable">
         <thead>
@@ -2789,7 +2834,7 @@ function renderZonaRows(rows){
       const tip = `Con ${gap.need} ${plural(gap.need,'respuesta Promotor nueva','respuestas Promotor nuevas')} más -- manteniendo los ${ne} neutros y ${d} detractores actuales sin cambio -- el NPS de la zona llegaría a 80% (de ${n} a ${n+gap.need} respuestas).`;
       targetTxt = `<div class="zr-target" title="${tip}">Meta 80%: faltan <strong>${gap.need}</strong> ${plural(gap.need,'promotor nuevo','promotores nuevos')} para llegar a la meta</div>`;
     }
-    return `<div class="zona-row">
+    return `<div class="zona-row clickable" data-zona="${escHtml(z)}" role="button" tabindex="0" title="Ver análisis de comentarios y acciones sugeridas">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:var(${ZONA_VAR[z]})"></span>${z}<span class="zr-n">n=${n} &middot; Zonal: ${zonal}${supTxt}</span></div>
         <div class="zr-nps" style="color:${npsColor}">${fmtPct(nps)}${deltaBadge}</div>
@@ -3407,7 +3452,7 @@ function renderTable(rows){
     const npsColor = r.nps===null?'var(--text-muted)':(r.nps>=80?'var(--good)':r.nps<=20?'var(--critical)':'var(--warning)');
     const barPct = r.nps===null?0:Math.max(0,Math.min(100,(r.nps+100)/2));
     const gapColor = r.gapLabel.indexOf('Cumple')>=0 ? 'var(--good)' : 'var(--text-secondary)';
-    return `<tr>
+    return `<tr class="clickable-row" data-suc="${escHtml(r.sucursal)}" tabindex="0" title="Ver análisis de comentarios y acciones sugeridas">
       <td class="name" title="${r.comuna? 'Comuna: '+r.comuna : ''}">${r.sucursal}</td>
       <td>${zonaBadge(r.zona)}</td>
       <td title="${r.jefaturaFull}">${r.jefatura}</td>
@@ -3809,6 +3854,305 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') cxCloseCase(); })
   list.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && e.target.classList.contains('vb-item')){ e.preventDefault(); open(e.target); } });
 })();
 
+// Fase 79 — pop up de análisis por zona / sucursal (NPS por zona y Ranking de
+// sucursales). Reglas deterministas, sin IA en ejecución: reutiliza cxDetect()
+// (causas por comentario + notas bajas por punto de contacto) sobre todos los
+// casos Neutro/Detractor del periodo elegido (mes o acumulado).
+const AN_AGG = {
+  entrega_tiempos:{
+    z:['Pedir a las jefaturas un tablero semanal de ventas facturadas sin entregar y escalar las que superen 72 h.','Semanal'],
+    j:['Revisar cada día las ventas pendientes de entrega y llamar al cliente con fecha comprometida antes del tercer día.','Diario'],
+    v:['Informar a cada cliente cada hito hasta la entrega y no prometer fechas sin validarlas con la jefatura.','Cada venta']},
+  estado_vehiculo:{
+    z:['Auditar 5 entregas por sucursal al mes contra el checklist de pre-entrega e informar los incumplimientos.','Mensual'],
+    j:['Exigir checklist de pre-entrega firmado y foto de "listo para entrega" antes de agendar cada entrega.','Desde hoy'],
+    v:['Revisar el vehículo con el checklist antes de entregarlo y no entregar si falta algo.','Cada entrega']},
+  falla_mecanica:{
+    z:['Revisar con Reacondicionamiento los vehículos con fallas post-venta y su origen para ajustar la inspección previa.','Mensual'],
+    j:['Exigir inspección técnica documentada y prueba de ruta antes de cada entrega; derivar cada falla a postventa en ≤ 48 h.','Desde hoy'],
+    v:['Informar al cliente, antes de la venta, todo detalle conocido del vehículo y acompañar el caso hasta cerrarlo.','Cada venta']},
+  info_promesas:{
+    z:['Implementar la hoja de compromisos de venta firmada por el cliente y revisar una muestra por sucursal.','≤ 30 días'],
+    j:['Revisar cada semana una muestra de carpetas de venta contra lo prometido y dar feedback 1:1 a quien no cumple.','Semanal'],
+    v:['Registrar todo lo ofrecido (accesorios, reparaciones, plazos, costos) y validarlo con la jefatura antes de comunicarlo.','Cada venta']},
+  tramites_costos:{
+    z:['Medir el tiempo de ciclo documental por sucursal y escalar a Administración los casos que superen la meta.','Mensual'],
+    j:['Entregar al cliente, antes de pagar, el detalle de costos y trámites y asignar un ejecutivo que informe los avances.','Cada venta'],
+    v:['Explicar todos los costos y trámites antes de la reserva y enviar el avance por WhatsApp.','Cada venta']},
+  traspaso:{
+    z:['Definir un responsable único del cliente, de la venta a la entrega, cuando el vehículo viene de otra sucursal.','≤ 30 días'],
+    j:['Usar una ficha de traspaso (compromisos, fecha de entrega, estado del vehículo) en cada traslado entre sucursales.','Desde hoy'],
+    v:['Seguir como contacto del cliente hasta la entrega, aunque el vehículo esté en otra sucursal.','Cada venta']},
+  atencion:{
+    z:['Incluir el NPS individual y los comentarios de atención en la reunión mensual con las jefaturas.','Mensual'],
+    j:['Hacer feedback 1:1 y acompañar en sala a los vendedores con casos de trato; reconocer los comentarios positivos.','≤ 2 semanas'],
+    v:['Explicar cada etapa del proceso y confirmar los próximos pasos al cierre de cada visita.','Desde hoy']},
+  acogida:{
+    z:['Medir el estándar de recepción con una visita de cliente incógnito al mes por sucursal.','Mensual'],
+    j:['Observar una jornada de sala: saludo en menos de 1 minuto y vendedor asignado sin esperas.','≤ 1 semana'],
+    v:['Saludar en menos de 1 minuto, identificar la necesidad del cliente y presentarse.','Cada visita']},
+  claridad:{
+    z:['Estandarizar la cotización de precio final desglosado y verificar su uso en cada sucursal.','≤ 30 días'],
+    j:['Exigir cotización desglosada por escrito (precio, bonos, gastos, permiso, seguros) antes de cada reserva.','Desde hoy'],
+    v:['Explicar el precio final en voz alta y entregarlo por escrito antes de la reserva.','Cada venta']},
+  comunicacion:{
+    z:['Acordar con las jefaturas un estándar de respuesta de máximo 4 horas hábiles y revisarlo cada mes.','≤ 30 días'],
+    j:['Revisar cada semana una muestra de chats y llamadas: tiempos de respuesta e hitos informados.','Semanal'],
+    v:['Acordar canal y frecuencia de contacto al cerrar la venta y responder en máximo 4 horas hábiles.','Cada venta']},
+  fluidez:{
+    z:['Publicar tiempos objetivo por etapa del proceso de compra y medir el ciclo venta→entrega por sucursal.','≤ 45 días'],
+    j:['Revisar cada mes las 3 principales causas de demora del proceso y asignar un responsable a cada una.','Mensual'],
+    v:['Avisar al cliente cada etapa y su plazo, y escalar a la jefatura cualquier demora.','Cada venta']},
+  parte_pago:{
+    z:['Estandarizar la tasación con comparables y respuesta al cliente en máximo 24 h hábiles.','≤ 30 días'],
+    j:['Revisar las tasaciones de clientes disconformes y contrastar los criterios con lo informado.','Semanal'],
+    v:['Explicar los criterios de tasación y entregar el valor final por escrito en máximo 24 h hábiles.','Cada tasación']},
+  entrega:{
+    z:['Revisar el cumplimiento de fecha comprometida vs. real en las entregas de cada sucursal.','Mensual'],
+    j:['Agendar cada entrega con confirmación 24 h antes, checklist y presencia de la jefatura; llamar al cliente a las 48 h.','Desde hoy'],
+    v:['Explicar el vehículo (15 min) y llamar al cliente a las 48 h para verificar que todo esté en orden.','Cada entrega']},
+  general:{
+    z:['Pedir a las jefaturas que registren la causa en cada llamada de recuperación para detectar patrones.','Mensual'],
+    j:['Llamar a cada detractor y neutro sin comentario y registrar la causa de su nota en el CRM.','≤ 48 h'],
+    v:['Cerrar cada entrega preguntando qué mejoraría para un 9 o 10 y registrar la respuesta.','Cada entrega']}
+};
+
+let AN = null; // {kind:'zona'|'suc', name, period}
+
+function anRowsAll(kind, name){
+  return ALL_NPS_ROWS.filter(r=> kind==='zona' ? r.zona===name : r.sucursal===name);
+}
+function anRowsOf(all, key){
+  if(key==='acc') return all;
+  const set = new Set(DATA_BY_MONTH[key]||[]);
+  return all.filter(r=>set.has(r));
+}
+function anCauses(rows){
+  const np = rows.filter(r=>r.cat!=='Promotor');
+  const map = new Map(); let sinCausa = 0;
+  np.forEach(r=>{
+    const det = cxDetect(r);
+    det.forEach(t=>{
+      if(t.id.indexOf('general_')===0){ sinCausa++; return; }
+      if(!map.has(t.id)) map.set(t.id, {id:t.id, th:CX_THEMES[t.id], rows:[], quoted:[]});
+      const e = map.get(t.id); e.rows.push(r);
+      if(t.why.includes('Comentario del cliente')){
+        // elegir el campo que realmente contiene la causa (comentario general o de entrega)
+        const f = [r.motivo, r.motivo_entrega].filter(Boolean).find(x=>e.th.re && e.th.re.test(cxNorm(x))) || r.motivo || r.motivo_entrega;
+        if(f) e.quoted.push({r, text:f});
+      }
+    });
+  });
+  const list = [...map.values()].sort((a,b)=>b.rows.length-a.rows.length || a.th.label.localeCompare(b.th.label,'es'));
+  return {list, total:np.length, sinCausa};
+}
+function anTopCauseLabel(rows){
+  const c = anCauses(rows);
+  return c.list.length ? c.list[0].th.label : (c.total ? 'Sin causa clara' : '—');
+}
+function anQuote(txt){
+  const t = String(txt || '').replace(/\s+/g,' ').trim();
+  return t.length>230 ? t.slice(0,227).trimEnd()+'…' : t;
+}
+function anNpsColor(nps){ return nps===null?'var(--text-muted)':(nps>=80?'var(--good)':nps<=20?'var(--critical)':'var(--warning)'); }
+function anDelta(a,b){ return (a===null||b===null) ? null : a-b; }
+
+function anBuild(){
+  const all = anRowsAll(AN.kind, AN.name);
+  const months = MONTHS_META.filter(m=>m.key!=='2025-12').map(m=>({m, rows:anRowsOf(all,m.key)})).filter(x=>x.rows.length);
+  if(!months.length) return null;
+  if(AN.period!=='acc' && !months.some(x=>x.m.key===AN.period)) AN.period = months[months.length-1].m.key;
+  const rows = AN.period==='acc' ? all : months.find(x=>x.m.key===AN.period).rows;
+  const st = npsStats(rows);
+  let prev = null;
+  if(AN.period!=='acc'){
+    const i = months.findIndex(x=>x.m.key===AN.period);
+    if(i>0) prev = {label:months[i-1].m.label, st:npsStats(months[i-1].rows)};
+  }
+  return {all, months, rows, st, prev, causes:anCauses(rows)};
+}
+
+function anHtml(){
+  const B = anBuild();
+  if(!B) return {head:`<div class="cm-head-t"><h3 id="cmTitle">${escHtml(AN.name)}</h3><div class="cm-sub">Sin respuestas registradas.</div></div><button class="cm-close" id="cmClose" type="button" aria-label="Cerrar">&times;</button>`, body:''};
+  const {all, months, rows, st, prev, causes} = B;
+  const isZ = AN.kind==='zona';
+  const perLabel = AN.period==='acc' ? 'Acumulado '+months[0].m.label.slice(0,3)+'–'+months[months.length-1].m.label.slice(0,3)+' '+months[months.length-1].m.label.slice(-4) : monthMeta(AN.period).label+(monthMeta(AN.period).is_closed?'':' (parcial)');
+  const r0 = all[0];
+  const sub = isZ
+    ? `Zonal: ${escHtml(r0.zonal||'—')}${(r0.supervisor && r0.supervisor!=='Sin asignar')?' &middot; Supervisor: '+escHtml(r0.supervisor):''}`
+    : `${escHtml(r0.zona)} &middot; Jefatura: ${escHtml([...new Set(rows.map(r=>r.jefatura))].join(', '))}${r0.comuna?' &middot; '+escHtml(r0.comuna):''}`;
+  const head = `
+    <div class="cm-score" style="background:${st.nps===null?'var(--text-muted)':anNpsColor(st.nps)}; font-size:${String(st.nps).length>2?15:19}px">${fmtPct(st.nps).replace('%','')}</div>
+    <div class="cm-head-t">
+      <div class="cm-eyebrow">${isZ?'Zona':'Sucursal'} &middot; análisis de comentarios &middot; NPS ${escHtml(perLabel)}</div>
+      <h3 id="cmTitle">${escHtml(AN.name)}</h3>
+      <div class="cm-sub">${sub}</div>
+    </div>
+    <button class="cm-close" id="cmClose" type="button" aria-label="Cerrar">&times;</button>`;
+
+  // periodo
+  const chips = months.map(x=>`<button type="button" class="an-chip${AN.period===x.m.key?' on':''}" data-an-period="${x.m.key}">${escHtml(x.m.label.slice(0,3))}${x.m.is_closed?'':'*'}</button>`).join('')
+    + `<button type="button" class="an-chip an-chip-acc${AN.period==='acc'?' on':''}" data-an-period="acc">Acumulado</button>`;
+
+  // KPIs
+  const d = prev ? anDelta(st.nps, prev.st.nps) : null;
+  const dTxt = d===null ? '' : `<span class="an-d" style="color:${d>0?'var(--good)':d<0?'var(--critical)':'var(--text-muted)'}">${d>0?'&#9650; +':d<0?'&#9660; ':'&#9644; '}${d} pts vs. ${escHtml(prev.label.slice(0,3))}</span>`;
+  const conCom = rows.filter(r=>r.motivo||r.motivo_entrega).length;
+  const gap = gapTo80(st.n, st.p, st.d);
+  const kpi = (l,v,s,c)=>`<div class="an-k"><div class="an-k-l">${l}</div><div class="an-k-v" style="${c?'color:'+c:''}">${v}</div><div class="an-k-s">${s}</div></div>`;
+  const kpis = `<div class="an-kpis">
+    ${kpi('NPS', fmtPct(st.nps), dTxt||'&nbsp;', anNpsColor(st.nps))}
+    ${kpi('Respuestas', st.n, `${conCom} con comentario`)}
+    ${kpi('Promotores', st.p, st.n?Math.round(st.p/st.n*100)+'%':'', 'var(--good)')}
+    ${kpi('Neutros', st.ne, st.n?Math.round(st.ne/st.n*100)+'%':'', 'var(--warning)')}
+    ${kpi('Detractores', st.d, st.n?Math.round(st.d/st.n*100)+'%':'', 'var(--critical)')}
+    ${kpi('Meta 80%', gap.need===0?'✓':'+'+gap.need, gap.need===0?'cumple':plural(gap.need,'promotor nuevo','promotores nuevos'), gap.need===0?'var(--good)':'')}
+  </div>`;
+
+  // causas
+  let causesHtml;
+  if(!causes.total){
+    causesHtml = `<div class="cm-quote cm-quote-empty">No hay neutros ni detractores en este periodo: no hay situaciones por corregir.</div>`;
+  } else if(!causes.list.length){
+    causesHtml = `<div class="cm-quote cm-quote-empty">Los ${causes.total} ${plural(causes.total,'caso','casos')} neutro/detractor de este periodo no traen comentario ni notas bajas que indiquen una causa clara.</div>`;
+  } else {
+    const maxN = causes.list[0].rows.length;
+    const nMonthsTot = months.length;
+    causesHtml = causes.list.slice(0,5).map((c,i)=>{
+      const n = c.rows.length, pct = Math.round(n/causes.total*100);
+      let rec = '';
+      if(AN.period==='acc'){
+        const nm = months.filter(x=>x.rows.some(r=>c.rows.includes(r))).length;
+        rec = `<span class="an-rec">Presente en ${nm} de ${nMonthsTot} ${plural(nMonthsTot,'mes','meses')}</span>`;
+      } else {
+        const accN = anCauses(all).list.find(x=>x.id===c.id);
+        if(accN) rec = `<span class="an-rec">${accN.rows.length} ${plural(accN.rows.length,'caso','casos')} en el acumulado</span>`;
+      }
+      const qs = c.quoted.slice().sort((a,b)=>(a.r.cat==='Detractor'?0:1)-(b.r.cat==='Detractor'?0:1) || String(b.r.fecha_respuesta||'').localeCompare(String(a.r.fecha_respuesta||''))).slice(0,2);
+      const quotes = qs.map(({r,text})=>`<div class="an-q">&ldquo;${escHtml(anQuote(text))}&rdquo;<span class="an-q-m"> &mdash; ${escHtml(r.cat)} ${r.score}${isZ?' &middot; '+escHtml(r.sucursal):''} &middot; ${escHtml(cxDMY(r.fecha_respuesta))}</span></div>`).join('');
+      return `<div class="an-cause">
+        <div class="an-cause-top"><span class="an-rank">${i+1}</span><span class="an-cause-n">${escHtml(c.th.label)}</span><span class="an-cause-c">${n} ${plural(n,'caso','casos')} &middot; ${pct}%</span></div>
+        <div class="an-bar"><i style="width:${n/maxN*100}%"></i></div>
+        ${rec}${quotes}
+      </div>`;
+    }).join('') + (causes.sinCausa ? `<div class="an-nocause">${causes.sinCausa} ${plural(causes.sinCausa,'caso','casos')} sin causa clara en comentario ni notas.</div>` : '');
+  }
+
+  // evolución mensual
+  const trows = months.map((x,i)=>{
+    const s = npsStats(x.rows);
+    const pr = i>0 ? npsStats(months[i-1].rows) : null;
+    const dd = pr ? anDelta(s.nps, pr.nps) : null;
+    const dh = dd===null ? '' : `<span class="an-d" style="color:${dd>0?'var(--good)':dd<0?'var(--critical)':'var(--text-muted)'}">${dd>0?'&#9650;':dd<0?'&#9660;':'&#9644;'}${dd>0?'+':''}${dd}</span>`;
+    return `<tr class="an-tr${AN.period===x.m.key?' on':''}" data-an-period="${x.m.key}" tabindex="0">
+      <td>${escHtml(x.m.label)}${x.m.is_closed?'':' <i>(parcial)</i>'}</td>
+      <td class="num">${s.n}</td>
+      <td class="num">${s.p}/${s.ne}/${s.d}</td>
+      <td class="num" style="color:${anNpsColor(s.nps)};font-weight:800">${fmtPct(s.nps)} ${dh}</td>
+      <td>${escHtml(anTopCauseLabel(x.rows))}</td></tr>`;
+  }).join('');
+  const sa = npsStats(all);
+  const accRow = `<tr class="an-tr an-tr-acc${AN.period==='acc'?' on':''}" data-an-period="acc" tabindex="0">
+      <td>Acumulado</td><td class="num">${sa.n}</td><td class="num">${sa.p}/${sa.ne}/${sa.d}</td>
+      <td class="num" style="color:${anNpsColor(sa.nps)};font-weight:800">${fmtPct(sa.nps)}</td><td>${escHtml(anTopCauseLabel(all))}</td></tr>`;
+  const trend = `<div class="an-tscroll"><table class="an-t"><thead><tr><th>Mes</th><th class="num">Resp.</th><th class="num">Prom/Neu/Det</th><th class="num">NPS</th><th>Situación que más se repite</th></tr></thead><tbody>${trows}${accRow}</tbody></table></div>`;
+
+  // concentración
+  let conc = '';
+  if(causes.total){
+    const npRows = rows.filter(r=>r.cat!=='Promotor');
+    const keyF = isZ ? (r=>r.sucursal) : (r=>r.vendedor ? cxTitleCase(r.vendedor) : 'Vendedor sin registrar');
+    const g = new Map();
+    rows.forEach(r=>{ const k=keyF(r); if(!g.has(k)) g.set(k,{k,n:0,p:0,np:0,d:0}); const e=g.get(k); e.n++; if(r.cat==='Promotor') e.p++; else e.np++; if(r.cat==='Detractor') e.d++; });
+    const top = [...g.values()].filter(e=>e.np>0).sort((a,b)=>b.np-a.np || b.d-a.d || a.k.localeCompare(b.k,'es')).slice(0,5);
+    conc = `<section>
+      <h4 class="cm-h">${isZ?'Sucursales con más neutros y detractores':'Vendedores con más neutros y detractores'} <span class="cm-h-s">${escHtml(perLabel)}</span></h4>
+      <div class="an-conc">${top.map(e=>`<div class="an-conc-r"><span class="an-conc-n">${escHtml(e.k)}</span><span class="an-conc-v"><b>${e.np}</b> de ${e.n} ${plural(e.n,'respuesta','respuestas')}${e.d?` &middot; ${e.d} ${plural(e.d,'detractor','detractores')}`:''}</span></div>`).join('')}</div>
+    </section>`;
+  }
+
+  // acciones
+  let actions = '';
+  if(causes.total){
+    const ids = causes.list.length ? causes.list.slice(0,3).map(c=>c.id) : ['general'];
+    const pick = lvl => ids.map(id=>AN_AGG[id][lvl]);
+    const extraTop = [];
+    if(gap.need>0){
+      extraTop.push(isZ
+        ? [`Meta 80%: faltan ${gap.need} ${plural(gap.need,'promotor nuevo','promotores nuevos')} en la zona; repartir la meta entre las sucursales y revisarla cada semana.`, 'Semanal']
+        : [`Meta 80%: faltan ${gap.need} ${plural(gap.need,'promotor nuevo','promotores nuevos')}; llamar a cada cliente neutro en ≤ 5 días para convertirlo en promotor.`, '≤ 5 días hábiles']);
+    }
+    if(isZ && conc){
+      const worst = [...new Map(rows.filter(r=>r.cat!=='Promotor').map(r=>[r.sucursal,0])).keys()];
+      const cnt = {}; rows.filter(r=>r.cat!=='Promotor').forEach(r=>{ cnt[r.sucursal]=(cnt[r.sucursal]||0)+1; });
+      const tops = worst.sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,'es')).slice(0,2);
+      extraTop.push([`Reunirse con ${tops.map(escHtml).join(' y ')} (mayor concentración de casos) para acordar un plan con responsable y fecha.`, '≤ 2 semanas']);
+    }
+    const lvA = isZ ? {t:'Zonal y supervisión', s:'Acciones a ejecutar', items:[...extraTop, ...pick('z')]}
+                    : {t:'Jefatura de sucursal', s:'Acciones a ejecutar', items:[...extraTop, ...pick('j')]};
+    const lvB = isZ ? {t:'Jefaturas de sucursal', s:'En cada sucursal de la zona', items:pick('j')}
+                    : {t:'Equipo de vendedores', s:'Conductas a aplicar', items:pick('v')};
+    const seen = new Set();
+    const render = g => `<div class="cm-grp"><div class="cm-grp-h"><span class="cm-grp-t">${escHtml(g.t)}</span><span class="cm-grp-s">${escHtml(g.s)}</span></div>
+      ${g.items.filter(a=>!seen.has(a[0]) && seen.add(a[0])).map(a=>`<div class="cm-act2"><div class="cm-act2-d">${a[0]}</div><span class="cm-act2-p">${escHtml(a[1])}</span></div>`).join('')}</div>`;
+    actions = `<section>
+      <h4 class="cm-h">Acciones sugeridas <span class="cm-h-s">para revertir las situaciones que más se repiten</span></h4>
+      ${render(lvA)}${render(lvB)}
+      <p class="cm-note">Análisis automático de los comentarios y notas por punto de contacto de neutros y detractores del periodo seleccionado. Validar con la jefatura antes de comprometer las acciones.</p>
+    </section>`;
+  }
+
+  const body = `
+    <div class="an-chips" role="group" aria-label="Periodo">${chips}</div>
+    ${kpis}
+    <section><h4 class="cm-h">Situaciones que más se repiten <span class="cm-h-s">${causes.total} ${plural(causes.total,'neutro/detractor','neutros/detractores')} &middot; ${escHtml(perLabel)}</span></h4>${causesHtml}</section>
+    ${conc}
+    ${actions}
+    <section><h4 class="cm-h">Evolución mensual y acumulado <span class="cm-h-s">presiona un mes para analizarlo</span></h4>${trend}</section>`;
+  return {head, body};
+}
+
+function anRender(keepScroll){
+  const {head, body} = anHtml();
+  const bodyEl = document.getElementById('cmBody');
+  const top = bodyEl.scrollTop;
+  document.getElementById('cmHead').innerHTML = head;
+  bodyEl.innerHTML = body;
+  bodyEl.scrollTop = keepScroll ? top : 0;
+  const c = document.getElementById('cmClose'); if(c) c.addEventListener('click', cxCloseCase);
+}
+function anOpen(kind, name){
+  const all = anRowsAll(kind, name);
+  if(!all.length) return;
+  const inState = all.some(r=>(DATA_BY_MONTH[state.month]||[]).includes(r));
+  AN = {kind, name, period: inState ? state.month : 'acc'};
+  anRender(false);
+  const ov = document.getElementById('cmOverlay');
+  CX_LAST_FOCUS = document.activeElement;
+  ov.classList.add('open'); ov.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('cmDialog').focus();
+}
+(function(){
+  document.getElementById('cmBody').addEventListener('click', e=>{
+    const t = e.target.closest('[data-an-period]');
+    if(t && AN && document.getElementById('cmOverlay').classList.contains('open')){ AN.period = t.dataset.anPeriod; anRender(true); }
+  });
+  document.getElementById('cmBody').addEventListener('keydown', e=>{
+    const t = e.target.closest && e.target.closest('tr[data-an-period]');
+    if(t && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); AN.period = t.dataset.anPeriod; anRender(true); }
+  });
+  const bind = (id, sel, attr, kind)=>{
+    const host = document.getElementById(id);
+    const open = el=>{ const it = el.closest(sel); if(it) { AN = null; anOpen(kind, it.getAttribute(attr)); } };
+    host.addEventListener('click', e=>open(e.target));
+    host.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && e.target.matches(sel)){ e.preventDefault(); open(e.target); } });
+  };
+  bind('zonaRows', '.zona-row[data-zona]', 'data-zona', 'zona');
+  bind('sucTableBody', 'tr[data-suc]', 'data-suc', 'suc');
+})();
+
 function computePeriodLabel(rows){
   const dates = rows.map(r=>r.fecha_venta).filter(Boolean).sort();
   if(!dates.length) return 'Periodo no disponible';
@@ -4104,7 +4448,7 @@ function cRenderZonaRows(){
     const dw = a.entregadas? a.digital/a.entregadas*100 : 0;
     const adhChkPct = a.adhChecklist===null? null : Math.round(a.adhChecklist*100);
     const adhColor = adhChkPct===null?'var(--text-muted)':(adhChkPct>=90?'var(--good)':adhChkPct>=70?'var(--warning)':'var(--critical)');
-    return `<div class="zona-row">
+    return `<div class="zona-row clickable" data-zona="${escHtml(z)}" role="button" tabindex="0" title="Ver análisis de comentarios y acciones sugeridas">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:var(${ZONA_VAR[z]})"></span>${z}<span class="zr-n">n=${a.entregadas} firmados</span></div>
         <div class="zr-nps" style="color:${adhColor}">${adhChkPct===null?'—':fmtPct(adhChkPct)} adhesión</div>
@@ -4477,7 +4821,7 @@ function tRenderZonaRows(rows){
     const dw = a.firmados? a.digital/a.firmados*100 : 0;
     const adhChkPct = a.adh_checklist===null ? null : Math.round(a.adh_checklist*100);
     const adhColor = adhChkPct===null?'var(--text-muted)':(adhChkPct>=90?'var(--good)':adhChkPct>=70?'var(--warning)':'var(--critical)');
-    return `<div class="zona-row">
+    return `<div class="zona-row clickable" data-zona="${escHtml(z)}" role="button" tabindex="0" title="Ver análisis de comentarios y acciones sugeridas">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:${zonaDotColor(z)}"></span>${z}<span class="zr-n">n=${a.firmados} firmados</span></div>
         <div class="zr-nps" style="color:${adhColor}">${adhChkPct===null?'—':fmtPct(adhChkPct)} adhesión</div>
@@ -4864,7 +5208,7 @@ function pRenderZonaRows(rows){
       const w = n ? c/n*100 : 0;
       return c ? `<div class="seg" style="width:${w}%;background:${estadoColor(e)}"></div>` : '';
     }).join('');
-    return `<div class="zona-row">
+    return `<div class="zona-row clickable" data-zona="${escHtml(z)}" role="button" tabindex="0" title="Ver análisis de comentarios y acciones sugeridas">
       <div class="zr-top">
         <div class="zr-name"><span class="dot" style="background:${zonaDotColor(z)}"></span>${z}<span class="zr-n">n=${n}</span></div>
         <div class="zr-nps">${n}</div>
