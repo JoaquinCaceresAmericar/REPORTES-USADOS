@@ -511,6 +511,33 @@
   .an-q{font-size:12.5px; line-height:1.45; color:var(--text-secondary); border-left:2px solid var(--border-strong); padding-left:9px; margin-top:6px;}
   .an-q-m{font-size:11px; color:var(--text-muted); white-space:normal;}
   .an-nocause{font-size:12px; color:var(--text-muted);}
+  /* Fase 91 — situación clicable + pop up resumen de casos */
+  .an-cause-link{cursor:pointer; transition:border-color .12s, background .12s;}
+  .an-cause-link:hover{border-color:var(--brand-blue); background:var(--surface-sunken);}
+  .an-cause-link:focus-visible{outline:2px solid var(--brand-blue); outline-offset:2px;}
+  .an-cause-go{font-size:11.5px; font-weight:700; color:var(--brand-blue-ink); white-space:nowrap;}
+  .an-sec-head{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:9px;}
+  .an-sec-head .cm-h{margin:0;}
+  .btn-download-sm{padding:5px 10px; font-size:11.5px; flex:none;}
+  #scOverlay{z-index:1100;}
+  #scOverlay .cm-dialog{width:min(820px,100%);}
+  .sc-badge{flex:none; min-width:46px; height:46px; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--critical); color:#fff; font-weight:800; font-size:19px; line-height:1;}
+  .sc-badge small{font-size:9px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; margin-top:2px; opacity:.92;}
+  .sc-sum{font-size:13.5px; line-height:1.6; color:var(--text-primary); border:1px solid var(--border); background:var(--surface-2); border-radius:12px; padding:11px 14px;}
+  .sc-sum b{font-weight:800;}
+  .sc-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .sc-tag{font-size:11.5px; font-weight:700; border:1px solid var(--border-strong); border-radius:999px; padding:3px 10px; color:var(--text-secondary); background:var(--surface);}
+  .sc-tbl{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .sc-tbl th{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); text-align:center; padding:8px 10px; background:var(--surface-2); border-bottom:1px solid var(--border); white-space:nowrap;}
+  .sc-tbl td{padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; text-align:center;}
+  .sc-tbl td.sc-txt{text-align:left; line-height:1.45; color:var(--text-secondary); min-width:240px;}
+  .sc-tbl td.sc-txt i{font-style:normal; color:var(--text-muted);}
+  .sc-tbl tr:last-child td{border-bottom:0;}
+  .sc-cat{display:inline-block; font-size:11px; font-weight:800; border-radius:999px; padding:2px 9px; white-space:nowrap;}
+  .sc-cat.det{background:color-mix(in srgb, var(--critical) 14%, transparent); color:var(--critical);}
+  .sc-cat.neu{background:color-mix(in srgb, var(--warning) 16%, transparent); color:var(--warning);}
+  .sc-act{font-size:13px; line-height:1.5; color:var(--text-primary);}
+  .sc-act small{display:block; color:var(--text-muted); font-size:11.5px; margin-top:2px;}
   .an-conc{display:flex; flex-direction:column; gap:5px;}
   .an-conc-r{display:flex; justify-content:space-between; gap:12px; border:1px solid var(--border); border-radius:10px; padding:7px 12px; background:var(--surface-2); font-size:13px;}
   .an-conc-n{font-weight:700; min-width:0; overflow-wrap:anywhere;}
@@ -766,8 +793,15 @@
     <div class="card-head">
       <div>
         <h2>Encuestas respondidas</h2>
-        <div class="card-sub">Comentarios de clientes por categoría de respuesta &mdash; seguimiento y cierre de brechas</div>
+        <div class="card-sub">Comentarios de clientes por categoría de respuesta &mdash; seguimiento y cierre de brechas &middot; <span id="vbExcelCount"></span></div>
       </div>
+      <button class="btn-download" id="btnDownloadResp" type="button" aria-label="Descargar Excel de las encuestas respondidas que se ven en esta card" title="Descarga las encuestas respondidas que se ven en esta card (respeta mes, zona, sucursal, jefatura, categoría, búsqueda y fechas)">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="currentColor"/>
+          <path d="M7.1 6.4h2.62l2.08 3.52 2.08-3.52h2.62l-3.3 5.6 3.3 5.6h-2.62l-2.08-3.52-2.08 3.52H7.1l3.3-5.6-3.3-5.6z" fill="#fff"/>
+        </svg>
+        Excel
+      </button>
     </div>
     <div class="vb-controls">
       <button class="chip active" data-cat="all">Todos</button>
@@ -1116,6 +1150,13 @@
   <div class="cm-dialog" id="cmDialog" role="dialog" aria-modal="true" aria-labelledby="cmTitle" tabindex="-1">
     <div class="cm-head" id="cmHead"></div>
     <div class="cm-body" id="cmBody"></div>
+  </div>
+</div>
+
+<div class="cm-overlay" id="scOverlay" aria-hidden="true">
+  <div class="cm-dialog" id="scDialog" role="dialog" aria-modal="true" aria-labelledby="scTitle" tabindex="-1">
+    <div class="cm-head" id="scHead"></div>
+    <div class="cm-body" id="scBody"></div>
   </div>
 </div>
 
@@ -2706,12 +2747,22 @@ function prevMonthKey(key){
   const py = m===1 ? y-1 : y;
   return `${py}-${String(pm).padStart(2,'0')}`;
 }
-function curMonthData(){ return DATA_BY_MONTH[state.month] || []; }
-function prevMonthData(){ return DATA_BY_MONTH[prevMonthKey(state.month)] || []; }
+// Fase 91 (08-oct-2026): opción "Todo 2026 (acumulado)" en el filtro de mes de la pestaña NPS.
+// state.month==='year' agrupa todas las respuestas del año (ene a mes en curso) y no tiene mes anterior.
+const YEAR_KEY = 'year';
+function isYearView(){ return state.month===YEAR_KEY; }
+function yearMonthKeys(){ return MONTHS_META.filter(m=>m.key!=='2025-12').map(m=>m.key); }
+function curMonthData(){ return isYearView() ? ALL_NPS_ROWS : (DATA_BY_MONTH[state.month] || []); }
+function prevMonthData(){ return isYearView() ? [] : (DATA_BY_MONTH[prevMonthKey(state.month)] || []); }
 
 function populateMonthSelect(){
   const sel = document.getElementById('fMonth');
   sel.innerHTML = '';
+  const opY = document.createElement('option');
+  opY.value = YEAR_KEY;
+  opY.textContent = 'Todo 2026 (acumulado)';
+  if(state.month===YEAR_KEY) opY.selected = true;
+  sel.appendChild(opY);
   MONTHS_META.filter(m=>m.key!=='2025-12').forEach(m=>{
     const op = document.createElement('option');
     op.value = m.key;
@@ -3365,7 +3416,25 @@ function renderMonthReading(rows, rowsPrev){
   document.getElementById('readingBox').innerHTML = `<div class="reading-lead">${leadHtml}</div><div class="reading-grid">${items.join('')}</div>${mgmtBlock}`;
 }
 
+function renderYearPanel(){
+  document.getElementById('momTitle').textContent = 'Todo 2026: resultado por mes';
+  document.getElementById('momCardSub').textContent = 'Segmento filtrado · variación vs. el mes anterior';
+  const keys = yearMonthKeys();
+  let prevNps = null;
+  const trs = keys.map(k=>{
+    const m = monthMeta(k);
+    const st = npsStats(applyFiltersOn(DATA_BY_MONTH[k]||[], ''));
+    const d = (st.nps!==null && prevNps!==null) ? st.nps-prevNps : null;
+    if(st.nps!==null) prevNps = st.nps; else prevNps = null;
+    const dh = d===null ? '<span style="color:var(--text-muted)">&mdash;</span>' : `<span class="an-d" style="color:${d>0?'var(--good)':d<0?'var(--critical)':'var(--text-muted)'}">${d>0?'&#9650; +':d<0?'&#9660; ':'&#9644; '}${d}</span>`;
+    return `<tr><td>${escHtml(m.label)}${m.is_closed?'':' <i>(parcial)</i>'}</td><td class="num">${st.n}</td><td class="num">${st.p}/${st.ne}/${st.d}</td><td class="num" style="color:${st.nps===null?'var(--text-muted)':anNpsColor(st.nps)};font-weight:800">${fmtPct(st.nps)}</td><td class="num">${dh}</td></tr>`;
+  }).join('');
+  const sa = npsStats(applyFilters());
+  const total = `<tr class="an-tr-acc"><td>Todo 2026</td><td class="num">${sa.n}</td><td class="num">${sa.p}/${sa.ne}/${sa.d}</td><td class="num" style="color:${sa.nps===null?'var(--text-muted)':anNpsColor(sa.nps)};font-weight:800">${fmtPct(sa.nps)}</td><td class="num">&mdash;</td></tr>`;
+  document.getElementById('momPanel').innerHTML = `<div class="an-tscroll"><table class="an-t"><thead><tr><th>Mes</th><th class="num">Resp.</th><th class="num">Prom/Neu/Det</th><th class="num">NPS</th><th class="num">Var. NPS</th></tr></thead><tbody>${trs}${total}</tbody></table></div><p class="cm-note">Vista de todo el año: selecciona un mes en el filtro para compararlo con el mes anterior.</p>`;
+}
 function renderMomPanel(rows, rowsPrev){
+  if(isYearView()){ renderYearPanel(); return; }
   const cur = npsStats(rows);
   const prev = npsStats(rowsPrev);
   const curMeta = monthMeta(state.month);
@@ -3650,6 +3719,7 @@ function renderVerbatims(rows){
   // del caso y acciones sugeridas (ver cxOpenCase). Fase 74 — Promotor también
   // abre el pop up con el detalle del caso, pero sin causas ni acciones sugeridas.
   VB_CURRENT_LIST = list;
+  { const ce = document.getElementById('vbExcelCount'); if(ce) ce.textContent = list.length+' '+plural(list.length,'encuesta','encuestas')+' en la lista'; }
   el.innerHTML = list.map((r,idx)=>{
     const color = STATUS_HEX_LIGHT[r.cat];
     const fechaResp = r.fecha_respuesta ? r.fecha_respuesta.split('-').reverse().join('-') : null;
@@ -3970,12 +4040,13 @@ function cxOpenCase(r){
 function cxCloseCase(){
   const ov = document.getElementById('cmOverlay');
   if(!ov.classList.contains('open')) return;
+  if(typeof scClose==='function') { const so = document.getElementById('scOverlay'); if(so){ so.classList.remove('open'); so.setAttribute('aria-hidden','true'); } }
   ov.classList.remove('open'); ov.setAttribute('aria-hidden','true');
   document.body.style.overflow = '';
   if(CX_LAST_FOCUS && CX_LAST_FOCUS.focus) { try{ CX_LAST_FOCUS.focus(); }catch(e){} }
 }
 document.getElementById('cmOverlay').addEventListener('click', e=>{ if(e.target.id==='cmOverlay') cxCloseCase(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') cxCloseCase(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(scIsOpen()) scClose(); else cxCloseCase(); } });
 (function(){
   const list = document.getElementById('vbList');
   const open = el=>{
@@ -4069,7 +4140,7 @@ function anCauses(rows){
     det.forEach(t=>{
       if(t.id.indexOf('general_')===0){ sinCausa++; return; }
       if(!map.has(t.id)) map.set(t.id, {id:t.id, th:CX_THEMES[t.id], rows:[], quoted:[]});
-      const e = map.get(t.id); e.rows.push(r);
+      const e = map.get(t.id); e.rows.push(r); (e.whyOf = e.whyOf || new Map()).set(r, t.why);
       if(t.why.includes('Comentario del cliente')){
         // elegir el campo que realmente contiene la causa (comentario general o de entrega)
         const f = [r.motivo, r.motivo_entrega].filter(Boolean).find(x=>e.th.re && e.th.re.test(cxNorm(x))) || r.motivo || r.motivo_entrega;
@@ -4168,8 +4239,8 @@ function anHtml(){
       }
       const qs = c.quoted.slice().sort((a,b)=>(a.r.cat==='Detractor'?0:1)-(b.r.cat==='Detractor'?0:1) || String(b.r.fecha_respuesta||'').localeCompare(String(a.r.fecha_respuesta||''))).slice(0,2);
       const quotes = qs.map(({r,text})=>`<div class="an-q">&ldquo;${escHtml(anQuote(text))}&rdquo;<span class="an-q-m"> &mdash; ${escHtml(r.cat)} ${r.score}${isZ?' &middot; '+escHtml(r.sucursal):''} &middot; ${escHtml(cxDMY(r.fecha_respuesta))}</span></div>`).join('');
-      return `<div class="an-cause">
-        <div class="an-cause-top"><span class="an-rank">${i+1}</span><span class="an-cause-n">${escHtml(c.th.label)}</span><span class="an-cause-c">${n} ${plural(n,'caso','casos')} &middot; ${pct}%</span></div>
+      return `<div class="an-cause an-cause-link" data-an-cause="${escHtml(c.id)}" role="button" tabindex="0" title="Ver el resumen de estos casos">
+        <div class="an-cause-top"><span class="an-rank">${i+1}</span><span class="an-cause-n">${escHtml(c.th.label)}</span><span class="an-cause-c">${n} ${plural(n,'caso','casos')} &middot; ${pct}%</span><span class="an-cause-go" aria-hidden="true">Ver casos &rsaquo;</span></div>
         <div class="an-bar"><i style="width:${n/maxN*100}%"></i></div>
         ${rec}${quotes}
       </div>`;
@@ -4256,7 +4327,9 @@ function anHtml(){
   const body = `
     <div class="an-chips" role="group" aria-label="Periodo">${chips}</div>
     ${kpis}
-    <section><h4 class="cm-h">Situaciones que más se repiten <span class="cm-h-s">${causes.total} ${plural(causes.total,'neutro/detractor','neutros/detractores')} &middot; ${escHtml(perLabel)}</span></h4>${causesHtml}</section>
+    <section><div class="an-sec-head"><h4 class="cm-h">Situaciones que más se repiten <span class="cm-h-s">${causes.total} ${plural(causes.total,'neutro/detractor','neutros/detractores')} &middot; ${escHtml(perLabel)} &middot; presiona una situación para ver sus casos</span></h4>${causes.total?`<button class="btn-download btn-download-sm" type="button" data-an-xlsx="all" aria-label="Descargar Excel con todos los neutros y detractores de este periodo">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="1" y="1" width="22" height="22" rx="4" fill="currentColor"/><path d="M7.1 6.4h2.62l2.08 3.52 2.08-3.52h2.62l-3.3 5.6 3.3 5.6h-2.62l-2.08-3.52-2.08 3.52H7.1l3.3-5.6-3.3-5.6z" fill="#fff"/></svg>
+      Excel</button>`:''}</div>${causesHtml}</section>
     ${conc}
     ${actions}
     <section><h4 class="cm-h">Evolución mensual y acumulado <span class="cm-h-s">presiona un mes para analizarlo</span></h4>${trend}</section>`;
@@ -4272,6 +4345,142 @@ function anRender(keepScroll){
   bodyEl.scrollTop = keepScroll ? top : 0;
   const c = document.getElementById('cmClose'); if(c) c.addEventListener('click', cxCloseCase);
 }
+// ---------- Fase 91: pop up "casos de una situación" (resumen) ----------
+let SC_LAST_FOCUS = null;
+function scIsOpen(){ return document.getElementById('scOverlay').classList.contains('open'); }
+function scClose(){
+  const ov = document.getElementById('scOverlay');
+  if(!ov.classList.contains('open')) return;
+  ov.classList.remove('open'); ov.setAttribute('aria-hidden','true');
+  if(SC_LAST_FOCUS && SC_LAST_FOCUS.focus){ try{ SC_LAST_FOCUS.focus(); }catch(e){} }
+}
+function scShort(txt, n){
+  const t = String(txt||'').replace(/\s+/g,' ').trim();
+  return t.length>n ? t.slice(0,n-1).trimEnd()+'…' : t;
+}
+function scHtml(causeId){
+  const B = anBuild();
+  if(!B) return null;
+  const {all, months, rows, causes} = B;
+  const c = causes.list.find(x=>x.id===causeId);
+  if(!c) return null;
+  const isZ = AN.kind==='zona', isV = AN.kind==='vend';
+  const n = c.rows.length, pct = causes.total ? Math.round(n/causes.total*100) : 0;
+  const det = c.rows.filter(r=>r.cat==='Detractor').length, neu = n-det;
+  const conCom = c.quoted.length;
+  const avgScore = n ? (c.rows.reduce((a,r)=>a+r.score,0)/n) : null;
+  const recSi = c.rows.filter(r=>r.recompra==='Sí').length;
+  const perLabel = AN.period==='acc' ? 'Acumulado '+months[0].m.label.slice(0,3)+'–'+months[months.length-1].m.label.slice(0,3)+' '+months[months.length-1].m.label.slice(-4) : monthMeta(AN.period).label+(monthMeta(AN.period).is_closed?'':' (parcial)');
+  const scope = isZ ? 'Zona' : isV ? 'Vendedor' : 'Sucursal';
+  const nm = isV ? cxTitleCase(AN.name) : AN.name;
+
+  // dónde se concentra
+  const keyF = isZ ? (r=>r.sucursal) : isV ? (r=>monthMeta((r.fecha_venta||'').slice(0,7)) ? monthMeta((r.fecha_venta||'').slice(0,7)).label : '—') : (r=>r.vendedor ? cxTitleCase(r.vendedor) : 'Vendedor sin registrar');
+  const g = new Map(); c.rows.forEach(r=>{ const k=keyF(r); g.set(k,(g.get(k)||0)+1); });
+  const mOrder = months.map(x=>x.m.label);
+  const top = [...g.entries()].sort(isV ? ((a,b)=>mOrder.indexOf(a[0])-mOrder.indexOf(b[0])) : ((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'))).slice(0,isV?12:5);
+  const concLabel = isZ ? 'Sucursales donde más ocurre' : isV ? 'Meses en que ocurre' : 'Vendedores involucrados';
+  const maxK = top.length ? top[0][1] : 1;
+  const conc = top.map(([k,v])=>`<div class="an-conc-r"><span class="an-conc-n">${escHtml(k)}</span><span class="an-conc-v"><b>${v}</b> ${plural(v,'caso','casos')}</span></div>`).join('');
+
+  // meses en los que aparece
+  const byMonth = months.map(x=>({lab:x.m.label.slice(0,3), k:c.rows.filter(r=>x.rows.includes(r)).length})).filter(x=>x.k>0);
+
+  // etapas con nota baja entre estos casos
+  const low = TP_FIELDS.map(f=>({label:f.label, k:c.rows.filter(r=>typeof r[f.key]==='number' && r[f.key]<=3).length})).filter(x=>x.k>0).sort((a,b)=>b.k-a.k).slice(0,3);
+
+  // resumen en texto
+  const parts = [];
+  parts.push(`<b>${n} ${plural(n,'caso','casos')}</b> (${pct}% de los ${causes.total} neutros/detractores de ${escHtml(perLabel)}): <b>${det}</b> ${plural(det,'detractor','detractores')} y <b>${neu}</b> ${plural(neu,'neutro','neutros')}${avgScore!==null?`, nota promedio <b>${avgScore.toFixed(1).replace('.',',')}</b>`:''}.`);
+  if(top.length){
+    const t0 = top[0];
+    parts.push(isV
+      ? `Se reparte en ${byMonth.length} ${plural(byMonth.length,'mes','meses')}${byMonth.length?` (${byMonth.map(x=>x.lab+' '+x.k).join(', ')})`:''}.`
+      : `Se concentra en <b>${escHtml(t0[0])}</b> (${t0[1]} de ${n})${top.length>1?`, seguido de ${top.slice(1,3).map(([k,v])=>escHtml(k)+' ('+v+')').join(' y ')}`:''}.`);
+  }
+  parts.push(`${conCom} de ${n} ${plural(n,'caso','casos')} ${conCom===1?'trae':'traen'} comentario sobre esta situación${n-conCom>0?`; ${n-conCom} ${n-conCom===1?'se detectó':'se detectaron'} solo por notas bajas en las etapas`:''}.`);
+  const tags = [];
+  if(low.length) low.forEach(x=>tags.push(`${escHtml(x.label)}: nota ≤3 en ${x.k} ${plural(x.k,'caso','casos')}`));
+  if(n) tags.push(`Volvería a comprar: ${recSi} de ${n}`);
+  const tagHtml = `<div class="sc-tags">${tags.map(t=>`<span class="sc-tag">${t}</span>`).join('')}</div>`;
+
+  // tabla compacta de casos
+  const sorted = c.rows.slice().sort((a,b)=>(a.cat==='Detractor'?0:1)-(b.cat==='Detractor'?0:1) || String(b.fecha_respuesta||'').localeCompare(String(a.fecha_respuesta||'')));
+  const CAP = 15;
+  const qOf = new Map(c.quoted.map(q=>[q.r,q.text]));
+  const trs = sorted.slice(0,CAP).map(r=>{
+    const q = qOf.get(r);
+    const why = ((c.whyOf && c.whyOf.get(r))||[]).filter(w=>w!=='Comentario del cliente').join(' · ');
+    const txt = q ? `&ldquo;${escHtml(scShort(q,150))}&rdquo;` : `<i>Sin comentario${why?' · '+escHtml(why):''}</i>`;
+    const where = isZ ? escHtml(r.sucursal) : (isV ? escHtml(r.sucursal) : escHtml(r.vendedor?cxTitleCase(r.vendedor):'—'));
+    return `<tr><td style="white-space:nowrap">${escHtml(cxDMY(r.fecha_respuesta))}</td><td><span class="sc-cat ${r.cat==='Detractor'?'det':'neu'}">${escHtml(r.cat)} ${r.score}</span></td><td>${where}</td><td>${escHtml(cxTitleCase(r.cliente)||'—')}</td><td class="sc-txt">${txt}</td></tr>`;
+  }).join('');
+  const whereH = isZ||isV ? 'Sucursal' : 'Vendedor';
+  const more = n>CAP ? `<p class="cm-note">Se muestran ${CAP} de ${n} casos (detractores primero, luego los más recientes). Todas las respuestas se pueden bajar con el botón Excel de la pestaña NPS.</p>` : '';
+
+  // acción sugerida resumida
+  const agg = AN_AGG[c.id];
+  let act = '';
+  if(agg){
+    const lvl = isZ ? agg.z : isV ? agg.v : agg.j;
+    const who = isZ ? 'Zonal y supervisión' : isV ? 'Vendedor' : 'Jefatura de sucursal';
+    act = `<section><h4 class="cm-h">Acción sugerida</h4><div class="sc-act">${lvl[0]}<small>${escHtml(who)} &middot; ${escHtml(lvl[1])}</small></div></section>`;
+  }
+
+  const head = `
+    <div class="sc-badge">${n}<small>${plural(n,'caso','casos')}</small></div>
+    <div class="cm-head-t">
+      <div class="cm-eyebrow">Situación &middot; ${scope} ${escHtml(nm)} &middot; ${escHtml(perLabel)}</div>
+      <h3 id="scTitle">${escHtml(c.th.label)}</h3>
+      <div class="cm-sub">${pct}% de los neutros/detractores &middot; ${det} ${plural(det,'detractor','detractores')} &middot; ${neu} ${plural(neu,'neutro','neutros')}</div>
+    </div>
+    <button class="cm-close" id="scClose" type="button" aria-label="Cerrar detalle de la situación">&times;</button>`;
+  const body = `
+    <section><h4 class="cm-h">Resumen</h4><div class="sc-sum">${parts.join(' ')}${tagHtml}</div></section>
+    ${conc?`<section><h4 class="cm-h">${concLabel}</h4><div class="an-conc">${conc}</div></section>`:''}
+    <section><div class="an-sec-head"><h4 class="cm-h">Casos <span class="cm-h-s">${n} ${plural(n,'caso','casos')}</span></h4><button class="btn-download btn-download-sm" type="button" data-an-xlsx="cause" aria-label="Descargar Excel con el detalle de los casos de esta situación">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="1" y="1" width="22" height="22" rx="4" fill="currentColor"/><path d="M7.1 6.4h2.62l2.08 3.52 2.08-3.52h2.62l-3.3 5.6 3.3 5.6h-2.62l-2.08-3.52-2.08 3.52H7.1l3.3-5.6-3.3-5.6z" fill="#fff"/></svg>
+      Excel</button></div>
+      <div class="an-tscroll"><table class="sc-tbl"><thead><tr><th>Fecha</th><th>Categoría</th><th>${whereH}</th><th>Cliente</th><th>Qué dijo / por qué se detectó</th></tr></thead><tbody>${trs}</tbody></table></div>${more}
+    </section>
+    ${act}`;
+  return {head, body};
+}
+let SC_CUR = null;
+function anDownloadProblems(){
+  const B = anBuild(); if(!B) return;
+  const rows = B.rows.filter(r=>r.cat!=='Promotor').sort((a,b)=>(a.cat==='Detractor'?0:1)-(b.cat==='Detractor'?0:1) || String(b.fecha_respuesta||'').localeCompare(String(a.fecha_respuesta||'')));
+  const per = AN.period==='acc' ? 'acumulado' : AN.period;
+  const slug = String(AN.name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  downloadRespRows(rows, `casos_con_problemas_${AN.kind==='zona'?'zona':AN.kind==='vend'?'vendedor':'sucursal'}_${slug}_${per}`, 'Neutros y detractores', causeColsAll);
+}
+function scDownload(){
+  if(!SC_CUR) return;
+  const B = anBuild(); if(!B) return;
+  const c = B.causes.list.find(x=>x.id===SC_CUR); if(!c) return;
+  const rows = c.rows.slice().sort((a,b)=>(a.cat==='Detractor'?0:1)-(b.cat==='Detractor'?0:1) || String(b.fecha_respuesta||'').localeCompare(String(a.fecha_respuesta||'')));
+  const per = AN.period==='acc' ? 'acumulado' : AN.period;
+  const slug = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+  downloadRespRows(rows, `situacion_${slug(c.th.label)}_${slug(AN.name)}_${per}`, 'Casos de la situación', r=>[c.th.label, ((c.whyOf && c.whyOf.get(r))||[]).join(' | ')]);
+}
+function scOpen(causeId, trigger){
+  SC_CUR = causeId;
+  const h = scHtml(causeId);
+  if(!h) return;
+  document.getElementById('scHead').innerHTML = h.head;
+  document.getElementById('scBody').innerHTML = h.body;
+  document.getElementById('scBody').scrollTop = 0;
+  document.getElementById('scClose').addEventListener('click', scClose);
+  const ov = document.getElementById('scOverlay');
+  SC_LAST_FOCUS = trigger || document.activeElement;
+  ov.classList.add('open'); ov.setAttribute('aria-hidden','false');
+  document.getElementById('scDialog').focus();
+}
+document.getElementById('scOverlay').addEventListener('click', e=>{
+  if(e.target.id==='scOverlay') { scClose(); return; }
+  if(e.target.closest('[data-an-xlsx]')) scDownload();
+});
+
 function anOpen(kind, name){
   const all = anRowsAll(kind, name);
   if(!all.length) return;
@@ -4286,10 +4495,16 @@ function anOpen(kind, name){
 }
 (function(){
   document.getElementById('cmBody').addEventListener('click', e=>{
+    const xb = e.target.closest('[data-an-xlsx]');
+    if(xb && AN){ e.stopPropagation(); anDownloadProblems(); return; }
+    const cz = e.target.closest('[data-an-cause]');
+    if(cz && AN){ scOpen(cz.dataset.anCause, cz); return; }
     const t = e.target.closest('[data-an-period]');
     if(t && AN && document.getElementById('cmOverlay').classList.contains('open')){ AN.period = t.dataset.anPeriod; anRender(true); }
   });
   document.getElementById('cmBody').addEventListener('keydown', e=>{
+    const cz = e.target.closest && e.target.closest('[data-an-cause]');
+    if(cz && AN && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); scOpen(cz.dataset.anCause, cz); return; }
     const t = e.target.closest && e.target.closest('tr[data-an-period]');
     if(t && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); AN.period = t.dataset.anPeriod; anRender(true); }
   });
@@ -4370,6 +4585,11 @@ function renderHeaderKPIs(){
 }
 
 function renderFootCohorts(){
+  if(isYearView()){
+    const footEl = document.getElementById('footCohorts');
+    if(footEl) footEl.innerHTML = `<b>Todo 2026 (acumulado):</b> encuestas de clientes cuya <b>venta</b> ocurrió entre enero y el mes en curso de 2026 (${curMonthData().length} respuestas); sin cohorte de comparación.`;
+    return;
+  }
   const meta = monthMeta(state.month);
   const prevKeyStr = prevMonthKey(state.month);
   const prevMeta = monthMeta(prevKeyStr);
@@ -5180,7 +5400,8 @@ PENDING_DATA.forEach(r=>{
 // de la pestaña NPS para ese mismo mes.
 function muestraSegment(){
   return PENDING_DATA.filter(r=>{
-    if((r.fecha_facturacion||'').slice(0,7) !== state.month) return false;
+    const fm = (r.fecha_facturacion||'').slice(0,7);
+    if(isYearView() ? !yearMonthKeys().includes(fm) : fm !== state.month) return false;
     if(state.zona && r.zona!==state.zona) return false;
     if(state.sucursal && r.sucursal!==state.sucursal) return false;
     if(state.jefatura && r.jefatura!==state.jefatura) return false;
@@ -5216,7 +5437,7 @@ function renderMuestraTotal(){
   const vencidas = seg.filter(r=>r.grupo==='Pendiente' && r._diasRestantes!==null && r._diasRestantes<0).length;
   const pct = (x)=> total ? Math.round(x/total*100)+'%' : '—';
   const meta = monthMeta(state.month);
-  const label = meta ? meta.label : state.month;
+  const label = isYearView() ? 'todo 2026' : (meta ? meta.label : state.month);
   // Fase 41 — "Tasa de respuesta" (pedido del usuario): respondidas sobre el
   // total de encuestas enviadas a la fecha, incluyendo TODOS los estados
   // (respondida + pendiente + fallido) — es exactamente `total` (ya calculado
@@ -5563,8 +5784,9 @@ function xlsxCellXml(colLetter, rowNum, value){
   const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${esc}</t></is></c>`;
 }
-function xlsxBuildBlob(headers, rows){
-  const cols = headers.map((_,i)=> String.fromCharCode(65 + (i % 26)) ); // suficiente para <=26 columnas
+function xlsxColName(i){ let n=i+1, s=''; while(n>0){ const r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26); } return s; }
+function xlsxBuildBlob(headers, rows, sheetName){
+  const cols = headers.map((_,i)=> xlsxColName(i) ); // A..Z, AA.. (Fase 91: ya no limitado a 26 columnas)
   let rowsXml = '<row r="1">' + headers.map((h,i)=>xlsxCellXml(cols[i],1,h)).join('') + '</row>';
   rows.forEach((vals, idx)=>{
     const rn = idx + 2;
@@ -5573,7 +5795,7 @@ function xlsxBuildBlob(headers, rows){
   const sheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rowsXml}</sheetData></worksheet>`;
   const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`;
   const rootRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
-  const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Encuestas pendientes" sheetId="1" r:id="rId1"/></sheets></workbook>`;
+  const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${(sheetName||'Encuestas pendientes').replace(/[^A-Za-z0-9 áéíóúñÁÉÍÓÚÑ]/g,'')}" sheetId="1" r:id="rId1"/></sheets></workbook>`;
   const workbookRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`;
   const enc = new TextEncoder();
   return xlsxMakeZip([
@@ -5618,6 +5840,57 @@ function downloadPendientesExcel(){
   }
 }
 document.getElementById('pBtnDownloadXlsx').addEventListener('click', downloadPendientesExcel);
+
+// Fase 91 (08-oct-2026) — botón "Excel" de la pestaña NPS: descarga las encuestas RESPONDIDAS
+// que se ven con los filtros activos (mes o todo 2026, zona, sucursal, jefatura), ordenadas por
+// fecha de respuesta (más reciente primero). Reutiliza el escritor .xlsx de Encuestas Pendientes.
+const RESP_HEADERS = ['Fecha de venta','Fecha de envío','Fecha de respuesta','Cliente','Sucursal','Zona','Jefatura','Zonal','Supervisor','Comuna','Vendedor','Marca','Modelo','Nota (0-10)','Categoría', ...TP_FIELDS.map(f=>f.label), 'Canal de compra','Volvería a comprar','Comentario general','Comentario de entrega'];
+function respExcelVals(r){
+  const clean = v => String(v||'').replace(/\s+/g,' ').trim();
+  return [
+    r.fecha_venta||'', r.fecha_envio||'', r.fecha_respuesta||'',
+    cxTitleCase(r.cliente), r.sucursal||'', r.zona||'', r.jefatura||'', r.zonal||'', (r.supervisor && r.supervisor!=='Sin asignar')?r.supervisor:'',
+    r.comuna||'', cxTitleCase(r.vendedor), r.marca||'', r.modelo||'',
+    (typeof r.score==='number')?r.score:'', r.cat||'',
+    ...TP_FIELDS.map(f=>(typeof r[f.key]==='number')?r[f.key]:''),
+    r.canal||'', r.recompra||'', clean(r.motivo), clean(r.motivo_entrega)
+  ];
+}
+function xlsxSave(blob, fileName){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+// Descarga genérica de encuestas respondidas. causeFn(r) -> [situación, motivo] agrega 2 columnas (casos con problemas).
+function downloadRespRows(rows, fileBase, sheetName, causeFn){
+  const headers = RESP_HEADERS.concat(causeFn ? ['Situación detectada','Motivo de detección'] : []);
+  const vals = rows.map(r=> respExcelVals(r).concat(causeFn ? causeFn(r) : []));
+  xlsxSave(xlsxBuildBlob(headers, vals, sheetName), `${fileBase}_${isoLocal(new Date())}.xlsx`);
+}
+function causeColsAll(r){
+  const det = cxDetect(r);
+  const lab = det.map(t=> t.id.indexOf('general_')===0 || !CX_THEMES[t.id] ? 'Sin causa clara' : CX_THEMES[t.id].label);
+  return [[...new Set(lab)].join(' | '), [...new Set(det.flatMap(t=>t.why))].join(' | ')];
+}
+// Botón de la card "Encuestas respondidas": descarga exactamente la lista que se ve en la card.
+function downloadRespondidasExcel(){
+  const btn = document.getElementById('btnDownloadResp');
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.textContent = 'Generando…';
+  try{
+    const rows = VB_CURRENT_LIST.slice();
+    const mesTxt = isYearView() ? 'todo-2026' : state.month;
+    const seg = [state.zona, state.sucursal, state.jefatura].filter(Boolean).length || state.vbCat!=='all' || state.vbSearch || state.vbDesde || state.vbHasta ? '_filtrado' : '';
+    downloadRespRows(rows, `encuestas_respondidas_${mesTxt}${seg}`, 'Encuestas respondidas', null);
+  } finally {
+    btn.disabled = false; btn.innerHTML = original;
+  }
+}
+document.getElementById('btnDownloadResp').addEventListener('click', downloadRespondidasExcel);
 
 // Fase 51 — "Detalle de encuestas perdidas" (grupo "Fallido": correo no válido,
 // rebotado, rechazado o no enviado). Mismo patrón de tabla ordenable que
