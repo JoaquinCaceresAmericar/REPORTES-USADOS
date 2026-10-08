@@ -380,6 +380,7 @@
   #sucTable th, #vendTable th{position:sticky; top:0; background:var(--surface); z-index:1;}
   #vendTable th[data-key=rank]{cursor:default;}
   #vendTable tr.low td{opacity:.62;}
+  #vendTable td.npscell{white-space:nowrap;}
   .vend-min{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .vend-select{font:inherit; font-size:12.5px; padding:6px 10px; border:1px solid var(--border-strong); border-radius:8px; background:var(--surface); color:var(--text-primary);}
 
@@ -701,6 +702,7 @@
         <select id="rkSZona" class="vend-select"><option value="">Todas</option></select>
         <label for="rkSSuc" class="flabel">Sucursal</label>
         <select id="rkSSuc" class="vend-select"><option value="">Todas</option></select>
+        <button type="button" class="reset-btn" id="rkSReset">Limpiar filtros</button>
       </div>
     </div>
     <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
@@ -736,6 +738,7 @@
         <select id="rkVZona" class="vend-select"><option value="">Todas</option></select>
         <label for="rkVSuc" class="flabel">Sucursal</label>
         <select id="rkVSuc" class="vend-select"><option value="">Todas</option></select>
+        <button type="button" class="reset-btn" id="rkVReset">Limpiar filtros</button>
       </div>
     </div>
     <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
@@ -4476,6 +4479,8 @@ document.querySelectorAll('#vendTable th[data-key]:not([data-key=rank])').forEac
   });
 });
 ['S','V'].forEach(pre=>{
+  // Fase 89: "Limpiar filtros" de los rankings = el mismo reinicio que el botón global de la hoja NPS.
+  document.getElementById('rk'+pre+'Reset').addEventListener('click', ()=>document.getElementById('btnReset').click());
   document.getElementById('rk'+pre+'Zona').addEventListener('change', e=>{ const g=document.getElementById('fZona'); g.value=e.target.value; g.dispatchEvent(new Event('change')); });
   document.getElementById('rk'+pre+'Suc').addEventListener('change', e=>{ const g=document.getElementById('fSucursal'); g.value=e.target.value; g.dispatchEvent(new Event('change')); });
 });
