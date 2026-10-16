@@ -482,6 +482,16 @@
   .cm-act2-p{flex:none; font-size:11px; font-weight:700; line-height:1; padding:5px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-secondary); white-space:nowrap;}
   @media (max-width:520px){ .cm-act2{flex-direction:column; gap:6px;} }
   /* Fase 79 — pop up de análisis por zona / sucursal */
+  /* Sesion 25 (16-oct-2026) — card "Pendientes por sucursal" (tabla horizontal por sucursal, pestaña Encuestas Pendientes) */
+  /* Pendientes por sucursal (s25): mismo look que #pendTable (Detalle de encuestas pendientes) */
+  #pSucTable th{position:sticky; top:0; background:var(--surface); z-index:1; cursor:pointer;}
+  #pSucTable th, #pSucTable td, #pSucTable td.num, #pSucTable th.num{text-align:center; font-variant-numeric:tabular-nums;}
+  #pSucTable td.name{font-weight:600;}
+  #pSucTable td.zero{color:var(--text-muted);}
+  #pSucTable tbody tr{cursor:pointer;}
+  #pSucTable tbody tr.sel td{background:var(--surface-sunken);}
+  #pSucTable tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--brand-blue);}
+  #pSucTable tfoot td{font-weight:800; border-top:2px solid var(--border); background:var(--surface-sunken);}
   .zona-row.clickable{cursor:pointer; border-radius:12px; padding:8px 10px; margin:-8px -10px; transition:background .12s ease;}
   .zona-row.clickable:hover{background:var(--surface-sunken);}
   .zona-row.clickable:focus-visible, tr.clickable-row:focus-visible{outline:2px solid var(--brand-blue); outline-offset:2px;}
@@ -915,6 +925,45 @@
             </tr>
           </thead>
           <tbody id="pendTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sesion 25 (16-oct-2026) — "Pendientes por sucursal": cuántas encuestas DISPONIBLES (pendientes dentro del
+         plazo de 7 días, accionables hoy) tiene cada sucursal, con su desglose por estado del envío, cuántas vencen
+         pronto y el contexto de la sucursal (fuera de plazo, respondidas, perdidas, muestra y tasa de respuesta).
+         Respeta mes de facturación, zona, vendedor y búsqueda del filterbar; NO respeta el chip de plazo (la tabla
+         muestra dentro y fuera de plazo en columnas separadas) ni el filtro de sucursal (para listarlas todas;
+         click en una fila la filtra / quita el filtro). -->
+    <div class="card" style="margin-bottom:14px;" id="pSucCard">
+      <div class="card-head">
+        <div>
+          <h2>Pendientes por sucursal</h2>
+          <div class="card-sub">Solo encuestas disponibles hoy (pendientes dentro del plazo de 7 días) &middot; Ordena por columna &middot; Click en una fila para filtrar &middot; <span id="pSucSubcount"></span></div>
+        </div>
+        <button class="btn-download" id="pBtnDownloadSucXlsx" type="button" aria-label="Descargar Excel">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="1" y="1" width="22" height="22" rx="4" fill="currentColor"/>
+            <path d="M7.1 6.4h2.62l2.08 3.52 2.08-3.52h2.62l-3.3 5.6 3.3 5.6h-2.62l-2.08-3.52-2.08 3.52H7.1l3.3-5.6-3.3-5.6z" fill="#fff"/>
+          </svg>
+          Excel
+        </button>
+      </div>
+      <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
+        <table class="data-table" id="pSucTable">
+          <thead>
+            <tr>
+              <th data-skey="suc">Sucursal<span class="arrow">▾</span></th>
+              <th data-skey="zona">Zona<span class="arrow">▾</span></th>
+              <th class="num" data-skey="disp" title="Pendientes de respuesta dentro del plazo de 7 días">Cantidad disponibles<span class="arrow">▾</span></th>
+              <th class="num" data-skey="hoy" title="Días restantes de vigencia = 0: vencen hoy">Vencen hoy<span class="arrow">▾</span></th>
+              <th class="num" data-skey="pronto" title="Les quedan 1 o 2 días de vigencia">Quedan 1–2 días<span class="arrow">▾</span></th>
+              <th class="num" data-skey="resto" title="Les quedan entre 3 y 7 días de vigencia">Quedan 3–7 días<span class="arrow">▾</span></th>
+              <th data-skey="jefatura">Jefatura<span class="arrow">▾</span></th>
+            </tr>
+          </thead>
+          <tbody id="pSucBody"></tbody>
+          <tfoot id="pSucFoot"></tfoot>
         </table>
       </div>
     </div>
@@ -5634,6 +5683,91 @@ function pRenderDonut(rows){
     <div class="li"><span class="sw" style="background:${x.color}"></span>${x.label}<b>${x.value} · ${n?Math.round(x.value/n*100):0}%</b></div>`).join('');
 }
 
+// Sesion 25 (16-oct-2026) — card "Pendientes por sucursal" (ver HTML #pSucCard): sucursal, zona, cantidad disponibles y jefatura.
+const pSucSort = {key:'disp', dir:'desc'};
+function pSucRowsData(){
+  // Universo = encuestas PENDIENTES DENTRO DE PLAZO (días restantes >= 0) con los filtros de mes/zona/vendedor/búsqueda, sin sucursal.
+  const base = PENDING_DATA.filter(r=>r.grupo==='Pendiente' && r._diasRestantes!==null && r._diasRestantes>=0 && pPassesFilters(r,'sucursal'));
+  const by = new Map();
+  base.forEach(r=>{
+    let e = by.get(r.sucursal);
+    if(!e){ e = {suc:r.sucursal, zona:r.zona, jefatura:r.jefatura||'', disp:0, hoy:0, pronto:0, resto:0}; by.set(r.sucursal,e); }
+    e.disp++;
+    const dr = r._diasRestantes;
+    if(dr===0) e.hoy++; else if(dr<=2) e.pronto++; else e.resto++;
+  });
+  return [...by.values()];
+}
+function pSucSortedList(){
+  const list = pSucRowsData();
+  const {key, dir} = pSucSort;
+  list.sort((a,b)=>{
+    let av=a[key], bv=b[key];
+    if(typeof av==='string'){ av=av.toLowerCase(); bv=String(bv).toLowerCase(); }
+    let c = av<bv?-1:av>bv?1:0; if(dir==='desc') c=-c;
+    return c || (b.disp-a.disp) || a.suc.localeCompare(b.suc,'es');
+  });
+  return list;
+}
+function pRenderSucursalCard(){
+  const body = document.getElementById('pSucBody');
+  if(!body) return;
+  const list = pSucSortedList();
+  const {key, dir} = pSucSort;
+  const tot = list.reduce((t,e)=>t+e.disp,0);
+  document.getElementById('pSucSubcount').textContent = `${tot} encuestas disponibles en ${list.length} sucursales`;
+  body.innerHTML = list.map(e=>`<tr data-suc="${escHtml(e.suc)}" class="${pstate.sucursal===e.suc?'sel':''}" tabindex="0" title="Click para filtrar por ${escHtml(e.suc)}">
+      <td class="name">${escHtml(e.suc)}</td>
+      <td>${zonaBadge(e.zona)}</td>
+      <td class="num"><b>${e.disp}</b></td>
+      ${[e.hoy,e.pronto,e.resto].map(v=>`<td class="num${v===0?' zero':''}">${v}</td>`).join('')}
+      <td>${escHtml(e.jefatura)}</td>
+    </tr>`).join('') || `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:16px;">Sin encuestas disponibles dentro de plazo para este filtro.</td></tr>`;
+  document.getElementById('pSucFoot').innerHTML = list.length ? `<tr>
+      <td colspan="2">Total (${list.length} sucursales)</td>
+      <td class="num">${tot}</td>
+      <td class="num">${list.reduce((t,e)=>t+e.hoy,0)}</td><td class="num">${list.reduce((t,e)=>t+e.pronto,0)}</td><td class="num">${list.reduce((t,e)=>t+e.resto,0)}</td><td></td></tr>` : '';
+  document.querySelectorAll('#pSucTable th[data-skey]').forEach(th=>{
+    const on = th.dataset.skey===key; th.classList.toggle('sorted', on);
+    const ar = th.querySelector('.arrow'); if(ar) ar.textContent = on ? (dir==='asc' ? '▴':'▾') : '▾';
+  });
+}
+function downloadPendientesSucursalExcel(){
+  const btn = document.getElementById('pBtnDownloadSucXlsx');
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Generando…';
+  try{
+    const list = pSucSortedList();
+    const headers = ['Sucursal','Zona','Cantidad disponibles','Vencen hoy','Quedan 1–2 días','Quedan 3–7 días','Jefatura'];
+    const vals = list.map(e=>[e.suc||'', e.zona||'', e.disp, e.hoy, e.pronto, e.resto, e.jefatura||'']);
+    const blob = xlsxBuildBlob(headers, vals);
+    const mesTxt = pstate.month ? pstate.month : 'todos';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pendientes_por_sucursal_${mesTxt}_${isoLocal(new Date())}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  } finally {
+    btn.disabled = false; btn.textContent = original;
+  }
+}
+(function(){
+  const tb = document.getElementById('pSucBody');
+  if(!tb) return;
+  const act = (tr)=>{ const suc = tr.getAttribute('data-suc'); pstate.sucursal = (pstate.sucursal===suc) ? '' : suc; pRenderAll(); };
+  tb.addEventListener('click', ev=>{ const tr = ev.target.closest('tr[data-suc]'); if(tr) act(tr); });
+  tb.addEventListener('keydown', ev=>{ if(ev.key!=='Enter' && ev.key!==' ') return; const tr = ev.target.closest('tr[data-suc]'); if(tr){ ev.preventDefault(); act(tr); } });
+  document.querySelectorAll('#pSucTable th[data-skey]').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.dataset.skey;
+      if(pSucSort.key===k) pSucSort.dir = pSucSort.dir==='desc' ? 'asc' : 'desc';
+      else { pSucSort.key = k; pSucSort.dir = (k==='disp') ? 'desc' : 'asc'; }
+      pRenderSucursalCard();
+    });
+  });
+  document.getElementById('pBtnDownloadSucXlsx').addEventListener('click', downloadPendientesSucursalExcel);
+})();
+
 const P_TABLE_CAP = 1000;
 // Fase 69 — se extrae el comparador de pRenderTable() a su propia función
 // para reutilizarlo tal cual en la descarga de Excel (downloadPendientesExcel),
@@ -6042,6 +6176,7 @@ function pRenderAll(){
   pRenderDonut(rows);
   pRenderEvoChart();
   pRenderTable(rows);
+  pRenderSucursalCard();
   pRenderLostTable();
 
   const note = document.getElementById('pVigenciaNote');
