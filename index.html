@@ -258,6 +258,9 @@
   .kpi .k-value{font-family:var(--font-display); font-size:28px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; color:var(--text-primary);}
   .kpi .k-value small{font-size:14px; font-weight:600; color:var(--text-muted); margin-left:2px;}
   .kpi .k-sub{font-size:11.5px; color:var(--text-secondary);}
+  .kpi .k-venc{margin-top:4px;}
+  .kpi .k-link{color:var(--brand-blue); font-weight:600; text-decoration:none;}
+  .kpi .k-link:hover{text-decoration:underline;}
   .kpi.hero .k-value{font-size:34px;}
   .kpi.hero{background:linear-gradient(155deg, var(--accent-wash), var(--surface) 60%);}
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block; flex:none;}
@@ -5637,13 +5640,21 @@ function pRenderKPIs(rows){
     {label:'Encuesta abierta', value:abiertas, sub: n?Math.round(abiertas/n*100)+'% de las vigentes':'—'},
     // Fase 31: correo no válido / rebotado / rechazado / no enviado — invitaciones
     // que nunca llegarán a responderse, independiente del chip de plazo activo.
-    {label:'Encuestas perdidas', value:perdidas, sub:'correo no válido, rebotado, rechazado o no enviado', color: perdidas>0?'var(--critical)':'var(--good)'},
+    {label:'Encuestas perdidas', value:perdidas, sub:'correo no válido, rebotado, rechazado o no enviado', color: perdidas>0?'var(--critical)':'var(--good)',
+     // Sesión 30 (22-oct-2026): con el chip "Dentro de plazo" activo, la card también informa
+     // cuántas encuestas del mismo segmento (mes/zona/sucursal/vendedor/búsqueda) ya quedaron
+     // perdidas por vencimiento del plazo (pendientes sin respuesta, >7d desde el envío), con
+     // acceso directo a su detalle (chip "Fuera de plazo").
+     extra: (pstate.plazo==='ok') ? (()=>{
+       const venc = pSegment().filter(r=>r._diasRestantes!==null && r._diasRestantes<0).length;
+       return `<div class="k-sub k-venc"><b style="color:${venc>0?'var(--critical)':'var(--good)'}">${venc}</b> fuera de plazo (&gt;${VIGENCIA_DAYS}d) sin respuesta${venc>0?` &middot; <a href="#" class="k-link" data-goto-venc="1">Ver detalle</a>`:''}</div>`;
+     })() : ''},
   ];
   document.getElementById('pKpiRow').innerHTML = kpis.map((k,i)=>`
     <div class="card kpi ${i===0?'hero':''}">
       <div class="k-label">${k.label}</div>
       <div class="k-value" style="${k.color?`color:${k.color}`:''}">${k.value}</div>
-      <div class="k-sub">${k.sub}</div>
+      <div class="k-sub">${k.sub}</div>${k.extra||''}
     </div>`).join('');
   document.getElementById('pFilterCount').textContent = n;
 }
@@ -6210,6 +6221,13 @@ document.querySelectorAll('#panelPendientes .chip[data-plazo]').forEach(chip=>{
     }
     pRenderAll();
   });
+});
+document.getElementById('pKpiRow').addEventListener('click', e=>{
+  const a = e.target.closest('[data-goto-venc]');
+  if(!a) return;
+  e.preventDefault();
+  const chip = document.querySelector('#panelPendientes .chip[data-plazo="venc"]');
+  if(chip) chip.click();
 });
 document.getElementById('pfDesde').addEventListener('change', e=>{ pstate.desde=e.target.value; pRenderAll(); });
 document.getElementById('pfHasta').addEventListener('change', e=>{ pstate.hasta=e.target.value; pRenderAll(); });
