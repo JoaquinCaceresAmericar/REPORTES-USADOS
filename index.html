@@ -839,16 +839,6 @@
     <div class="freshness-note" id="freshnessPend">Cargando fecha de actualización&hellip;</div>
 
     <div class="filterbar">
-      <span class="flabel">Estado de vigencia</span>
-      <button class="chip" data-plazo="all">Todas</button>
-      <button class="chip active" data-plazo="ok">Dentro de plazo (&le;7d)</button>
-      <button class="chip" data-plazo="venc">Fuera de plazo (&gt;7d)</button>
-      <span id="pDateRangeWrap" style="display:none; align-items:center; gap:6px;">
-        <span class="flabel">Envío entre</span>
-        <input type="date" id="pfDesde" class="vb-search" style="flex:0 0 145px; min-width:0;">
-        <span class="flabel" style="text-transform:none; font-weight:600;">y</span>
-        <input type="date" id="pfHasta" class="vb-search" style="flex:0 0 145px; min-width:0;">
-      </span>
       <span class="flabel">Filtrar por</span>
       <select id="pfMes" class="fselect"><option value="">Mes de facturación (todos)</option></select>
       <select id="pfZona" class="fselect"><option value="">Zona (todas)</option></select>
@@ -980,11 +970,11 @@
          plazo ni el rango de fechas (esos solo aplican al grupo "Pendiente" —
          un envío fallido no tiene "días restantes de vigencia", ver pLostAll
          más abajo en el script). -->
-    <div class="card" style="margin-bottom:14px;">
+    <div class="card" id="pLostCard" style="margin-bottom:14px;">
       <div class="card-head">
         <div>
           <h2>Detalle de encuestas perdidas</h2>
-          <div class="card-sub">Correo no válido, rebotado, rechazado o no enviado &middot; Ordena por columna &middot; <span id="pLostTableSubcount"></span></div>
+          <div class="card-sub">Fuera de plazo sin respuesta (más de 7 días desde el envío), correo no válido, rebotado, rechazado o no enviado &middot; Ordena por columna &middot; <span id="pLostTableSubcount"></span></div>
         </div>
       </div>
       <div class="table-scroll" style="max-height:520px; overflow-y:auto;">
@@ -5596,7 +5586,9 @@ function pPendingAll(){ return PENDING_DATA.filter(r=>r.grupo==='Pendiente'); }
 // zona/sucursal/vendedor/búsqueda igual que el resto de esta pestaña, pero
 // SIN el chip de plazo ni el rango de fechas (esos solo aplican al grupo
 // "Pendiente" — un envío fallido no tiene "días restantes de vigencia").
-function pLostAll(){ return PENDING_DATA.filter(r=>r.grupo==='Fallido'); }
+// Sesión 30 (23-oct-2026): "perdidas" = envíos fallidos (grupo Fallido) + encuestas que
+// ya quedaron fuera de plazo sin respuesta (grupo Pendiente con _diasRestantes<0).
+function pLostAll(){ return PENDING_DATA.filter(r=>r.grupo==='Fallido' || (r.grupo==='Pendiente' && r._diasRestantes!==null && r._diasRestantes<0)); }
 function pLostSegment(){ return pLostAll().filter(r=>pPassesFilters(r, '')); }
 // Segmento (zona/sucursal/vendedor/búsqueda), sin el filtro de plazo — sirve de
 // base tanto para poblar los selectores como para el "% del total". Al no haber
@@ -5620,48 +5612,32 @@ function pRebuildFilterOptions(){
 }
 
 function pRenderKPIs(rows){
-  // Sesión 30 (22-oct-2026): con el chip "Todas" las cards de vigencia cuentan solo las
-  // encuestas dentro de plazo (_diasRestantes>=0) y las que ya vencieron sin respuesta se
-  // informan como "perdidas" (junto con los envíos fallidos) — así "Todas" = vigentes + perdidas.
-  const modoTodas = pstate.plazo==='all';
-  const vigRows = modoTodas ? rows.filter(r=>r._diasRestantes!==null && r._diasRestantes>=0) : rows;
-  const n = vigRows.length;
+  // Sesión 30 (23-oct-2026): se eliminó el filtro "Estado de vigencia". "Encuestas vigentes hoy"
+  // = todas las encuestas pendientes dentro de plazo (_diasRestantes>=0) y "Encuestas perdidas"
+  // = todas las que ya quedaron fuera de plazo sin respuesta (>7d) más los envíos fallidos.
+  const n = rows.length;
   const totalSegment = pSegment().length;
-  // "Vencen hoy" = fecha de alerta (fecha de envío + 7 días de plazo) cae
-  // exactamente hoy, es decir, días restantes de vigencia = 0. Reemplaza al
-  // antiguo KPI "Fuera de plazo", que quedó redundante con el chip de plazo
-  // (siempre mostraba 0 en "Dentro de plazo" y el mismo valor que "vigentes
-  // hoy" en "Fuera de plazo").
-  const venceHoy = vigRows.filter(r=>r._diasRestantes===0).length;
-  const abiertas = vigRows.filter(r=>r.estado==='Encuesta abierta').length;
-  const fallidas = pLostSegment().length;
-  // Pendientes del segmento que ya superaron el plazo de 7 días sin respuesta.
-  const venc = pSegment().filter(r=>r._diasRestantes!==null && r._diasRestantes<0).length;
-  const linkVenc = venc>0 ? ` &middot; <a href="#" class="k-link" data-goto-venc="1">Ver detalle</a>` : '';
+  const venceHoy = rows.filter(r=>r._diasRestantes===0).length;
+  const abiertas = rows.filter(r=>r.estado==='Encuesta abierta').length;
+  const lost = pLostSegment();
+  const perdidas = lost.length;
+  const fallidas = lost.filter(r=>r.grupo==='Fallido').length;
+  const venc = perdidas - fallidas;
   const vencColor = venc>0 ? 'var(--critical)' : 'var(--good)';
-  // Fase 31: correo no válido / rebotado / rechazado / no enviado — invitaciones
-  // que nunca llegarán a responderse, independiente del chip de plazo activo.
-  let perdKpi;
-  if(modoTodas){
-    const tot = fallidas + venc;
-    perdKpi = {label:'Encuestas perdidas', value:tot,
-      sub:`<b style="color:${vencColor}">${venc}</b> fuera de plazo (&gt;${VIGENCIA_DAYS}d) sin respuesta &middot; ${fallidas} envíos fallidos${linkVenc}`,
-      color: tot>0?'var(--critical)':'var(--good)'};
-  } else {
-    perdKpi = {label:'Encuestas perdidas', value:fallidas, sub:'correo no válido, rebotado, rechazado o no enviado', color: fallidas>0?'var(--critical)':'var(--good)',
-      extra: (pstate.plazo==='ok') ? `<div class="k-sub k-venc"><b style="color:${vencColor}">${venc}</b> fuera de plazo (&gt;${VIGENCIA_DAYS}d) sin respuesta${linkVenc}</div>` : ''};
-  }
+  const link = perdidas>0 ? ` &middot; <a href="#" class="k-link" data-goto-lost="1">Ver detalle</a>` : '';
   const kpis = [
-    {label:'Encuestas vigentes hoy', value:n, sub:`de ${totalSegment} en el segmento seleccionado`, hero:true},
+    {label:'Encuestas vigentes hoy', value:n, sub:`dentro de plazo (&le;${VIGENCIA_DAYS}d) &middot; de ${totalSegment} en el segmento`, hero:true},
     {label:'Vencen hoy', value:venceHoy, sub:'cumplen hoy el plazo de 7 días desde el envío', color: venceHoy>0?'var(--critical)':'var(--good)'},
     {label:'Encuesta abierta', value:abiertas, sub: n?Math.round(abiertas/n*100)+'% de las vigentes':'—'},
-    perdKpi,
+    {label:'Encuestas perdidas', value:perdidas,
+      sub:`<b style="color:${vencColor}">${venc}</b> fuera de plazo (&gt;${VIGENCIA_DAYS}d) sin respuesta &middot; ${fallidas} envíos fallidos${link}`,
+      color: perdidas>0?'var(--critical)':'var(--good)'},
   ];
   document.getElementById('pKpiRow').innerHTML = kpis.map((k,i)=>`
     <div class="card kpi ${i===0?'hero':''}">
       <div class="k-label">${k.label}</div>
       <div class="k-value" style="${k.color?`color:${k.color}`:''}">${k.value}</div>
-      <div class="k-sub">${k.sub}</div>${k.extra||''}
+      <div class="k-sub">${k.sub}</div>
     </div>`).join('');
   document.getElementById('pFilterCount').textContent = n;
 }
@@ -6087,7 +6063,7 @@ function pRenderLostTable(){
       <td>${zonaBadge(r.zona)}</td>
       <td>${r.vendedor || '—'}</td>
       <td>${r.estado}</td>
-      <td>${r.motivo_rebote || (r.estado==='No enviado' ? 'Próximas a envío' : '—')}</td>
+      <td>${r.grupo==='Pendiente' ? `Sin respuesta tras ${VIGENCIA_DAYS} días (${r._dias} días desde el envío)` : (r.motivo_rebote || (r.estado==='No enviado' ? 'Próximas a envío' : '—'))}</td>
       <td>${r.fecha_envio || '—'}</td>
     </tr>`).join('') || `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:16px;">Sin encuestas perdidas para este filtro.</td></tr>`;
   document.querySelectorAll('#pendLostTable th[data-key]').forEach(th=>{
@@ -6200,44 +6176,16 @@ function pRenderAll(){
   const note = document.getElementById('pVigenciaNote');
   const mesMeta = pstate.month ? monthMeta(pstate.month) : null;
   const mesTxt = mesMeta ? ` Acotado a clientes facturados en ${mesMeta.label}.` : '';
-  if(pstate.plazo==='ok'){
-    note.textContent = `Mostrando encuestas vigentes hoy que aún están dentro del plazo de ${VIGENCIA_DAYS} días corridos desde el envío.${mesTxt}`;
-  } else if(pstate.plazo==='venc'){
-    const rango = (pstate.desde||pstate.hasta) ? ` Envío entre ${pstate.desde||'el inicio'} y ${pstate.hasta||'hoy'}.` : '';
-    note.textContent = `Mostrando encuestas vigentes hoy que ya superaron el plazo de ${VIGENCIA_DAYS} días corridos desde el envío (siguen pendientes de respuesta).${rango}${mesTxt}`;
-  } else {
-    note.textContent = `Mostrando todas las encuestas vigentes hoy (estado Enviado / Correo entregado / Correo leído / Encuesta abierta), sin filtrar por plazo.${mesTxt}`;
-  }
+  note.textContent = `Mostrando encuestas vigentes hoy que aún están dentro del plazo de ${VIGENCIA_DAYS} días corridos desde el envío; las que ya superaron el plazo se informan como perdidas.${mesTxt}`;
 }
 
-document.querySelectorAll('#panelPendientes .chip[data-plazo]').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
-    document.querySelectorAll('#panelPendientes .chip[data-plazo]').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    pstate.plazo = chip.dataset.plazo;
-    // El rango de fecha solo es útil (y visible) acotando el backlog de
-    // "fuera de plazo"; al salir de esa vista se limpia para que no quede un
-    // filtro invisible activo si se vuelve a seleccionar "venc" más tarde.
-    const wrap = document.getElementById('pDateRangeWrap');
-    if(pstate.plazo==='venc'){
-      wrap.style.display = 'inline-flex';
-    } else {
-      wrap.style.display = 'none';
-      pstate.desde=''; pstate.hasta='';
-      document.getElementById('pfDesde').value=''; document.getElementById('pfHasta').value='';
-    }
-    pRenderAll();
-  });
-});
 document.getElementById('pKpiRow').addEventListener('click', e=>{
-  const a = e.target.closest('[data-goto-venc]');
+  const a = e.target.closest('[data-goto-lost]');
   if(!a) return;
   e.preventDefault();
-  const chip = document.querySelector('#panelPendientes .chip[data-plazo="venc"]');
-  if(chip) chip.click();
+  const el = document.getElementById('pLostCard');
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
 });
-document.getElementById('pfDesde').addEventListener('change', e=>{ pstate.desde=e.target.value; pRenderAll(); });
-document.getElementById('pfHasta').addEventListener('change', e=>{ pstate.hasta=e.target.value; pRenderAll(); });
 document.getElementById('pfMes').addEventListener('change', e=>{ pstate.month=e.target.value; pRenderAll(); });
 document.getElementById('pfZona').addEventListener('change', e=>{ pstate.zona=e.target.value; pRenderAll(); });
 document.getElementById('pfSucursal').addEventListener('change', e=>{ pstate.sucursal=e.target.value; pRenderAll(); });
@@ -6247,11 +6195,8 @@ document.getElementById('pBtnReset').addEventListener('click', ()=>{
   // El mes de facturación no se toca al "Limpiar filtro" — mismo criterio que
   // el filtro de mes de las pestañas NPS y Checklist, donde "limpiar" solo
   // afecta a los sub-filtros (zona/sucursal/vendedor/búsqueda), no al mes.
-  pstate.zona=''; pstate.sucursal=''; pstate.vendedor=''; pstate.search=''; pstate.plazo='ok'; pstate.desde=''; pstate.hasta='';
+  pstate.zona=''; pstate.sucursal=''; pstate.vendedor=''; pstate.search='';
   document.getElementById('pfSearch').value='';
-  document.getElementById('pfDesde').value=''; document.getElementById('pfHasta').value='';
-  document.getElementById('pDateRangeWrap').style.display = 'none';
-  document.querySelectorAll('#panelPendientes .chip[data-plazo]').forEach(c=>c.classList.toggle('active', c.dataset.plazo==='ok'));
   pRenderAll();
 });
 document.querySelectorAll('#pendTable th[data-key]').forEach(th=>{
